@@ -1,0 +1,158 @@
+/* Design layer: one place for radii, shadows, motion, typography and the light/dark palette.
+   Values are original; the look (warm neutrals, soft depth, calm 200 ms motion) is inspired by public design practice. */
+:root {
+  --radius-xs: 0.375rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --t-fast: 150ms;
+  --t-base: 200ms;
+  --t-slow: 260ms;
+}
+
+/* ---------- Type: one typeface; titles are set by weight and tracking ---------- */
+h1, h2 { font-weight: 600; letter-spacing: -0.015em; }
+h1 { line-height: 1.15; }
+
+/* ---------- Shape ---------- */
+.rounded-3xl { border-radius: var(--radius-xl); }
+.rounded-2xl { border-radius: var(--radius-lg); }
+.rounded-xl { border-radius: var(--radius-md); }
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), select, textarea { border-radius: var(--radius-md); }
+
+/* ---------- Depth: cards are lifted by a soft layered shadow, not an outline ---------- */
+html:not([data-theme="dark"]) [class~="shadow-[0_2px_6px_rgba(0,0,0,0.08)]"],
+html:not([data-theme="dark"]) [class~="shadow-[0_2px_8px_rgba(0,0,0,0.08)]"] { box-shadow: var(--app-shadow); }
+
+/* ---------- Light theme: cool greys become warm tokens ---------- */
+html:not([data-theme="dark"]) [class~="bg-[#f1f1f1]"],
+html:not([data-theme="dark"]) [class~="bg-[#F1F1F1]"] { background-color: var(--app-bg); }
+html:not([data-theme="dark"]) [class~="bg-[#f3f5f7]"],
+html:not([data-theme="dark"]) [class~="bg-[#f7f8fa]"],
+html:not([data-theme="dark"]) [class~="bg-[#f0f2f5]"],
+html:not([data-theme="dark"]) [class~="bg-[#eef1f4]"],
+html:not([data-theme="dark"]) [class~="bg-[#f1f1f1]/60"] { background-color: var(--app-surface-soft); }
+html:not([data-theme="dark"]) [class~="bg-[#e6e8eb]"],
+html:not([data-theme="dark"]) [class~="bg-[#e9ecef]"],
+html:not([data-theme="dark"]) [class~="bg-[#e9ebee]"] { background-color: var(--app-surface-muted); }
+html:not([data-theme="dark"]) [class~="border-[#d8dee8]"],
+html:not([data-theme="dark"]) [class~="border-[#e1e5ea]"],
+html:not([data-theme="dark"]) [class~="border-[#e4e8ed]"],
+html:not([data-theme="dark"]) [class~="border-[#eef0f3]"],
+html:not([data-theme="dark"]) [class~="border-[#e6e9ee]"],
+html:not([data-theme="dark"]) [class~="border-[#e5e7eb]"],
+html:not([data-theme="dark"]) [class~="border-[#CECECE]"],
+html:not([data-theme="dark"]) [class~="border-[#cecece]"],
+html:not([data-theme="dark"]) [class~="border-[#cfcfcf]"],
+html:not([data-theme="dark"]) [class~="border-[#d1d5db]"],
+html:not([data-theme="dark"]) [class~="border-[#e5e5e5]"],
+html:not([data-theme="dark"]) [class~="border-[#d6d6d6]"] { border-color: var(--app-border); }
+html:not([data-theme="dark"]) [class~="text-[#181919]"],
+html:not([data-theme="dark"]) [class~="text-[#1f1f1f]"],
+html:not([data-theme="dark"]) [class~="text-[#20242c]"],
+html:not([data-theme="dark"]) [class~="text-[#111]"],
+html:not([data-theme="dark"]) [class~="text-gray-800"] { color: var(--app-text); }
+html:not([data-theme="dark"]) [class~="text-gray-500"],
+html:not([data-theme="dark"]) [class~="text-gray-600"],
+html:not([data-theme="dark"]) [class~="text-[#555]"],
+html:not([data-theme="dark"]) [class~="text-[#6b7280]"],
+html:not([data-theme="dark"]) [class~="text-[#6d6d6d]"] { color: var(--app-text-muted); }
+
+/* Links and quiet actions use the accent; focus is always visible. */
+[class~="text-[#1e61ad]"] { color: var(--link); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent) !important; outline: none; }
+[class~="focus:border-[#63C174]"]:focus { border-color: var(--accent); }
+::selection { background: color-mix(in srgb, var(--accent) 28%, transparent); }
+
+/* ---------- Motion: calm 200 ms, ease-out ---------- */
+button, a, [role="button"], input, select, textarea {
+  transition: background-color var(--t-base) var(--ease-out), color var(--t-base) var(--ease-out), border-color var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out), opacity var(--t-base) var(--ease-out), transform var(--t-fast) var(--ease-out);
+}
+button:not(:disabled):active, [role="button"]:active { transform: scale(0.985); }
+[class~="bg-[#181919]"]:not(:disabled):hover { background-color: #2c2b28; }
+button:disabled { cursor: not-allowed; }
+
+@keyframes page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop-in { from { opacity: 0; transform: translateY(4px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(14px) scale(0.985); } to { opacity: 1; transform: none; } }
+.anim-page { animation: page-in var(--t-slow) var(--ease-out) both; }
+.anim-fade { animation: fade-in var(--t-base) var(--ease-out) both; }
+.anim-pop { animation: pop-in var(--t-base) var(--ease-out) both; transform-origin: top right; }
+.anim-rise { animation: rise-in var(--t-slow) var(--ease-out) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+/* ---------- Classic theme: the original Bexex look on a white page ---------- */
+html[data-theme="classic"] {
+  --app-bg: #ffffff;
+  --app-surface: #ffffff;
+  --app-surface-soft: #f7f8fa;
+  --app-surface-muted: #f0f1f3;
+  --app-border: #e1e5ea;
+  --app-text: #181919;
+  --app-text-muted: #6b7280;
+  --app-text-soft: #9ca3af;
+  --app-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --accent: #63c174;
+  --accent-soft: #eaf8ed;
+  --link: #1e61ad;
+  color-scheme: light;
+}
+/* The original corner sizes. */
+html[data-theme="classic"] .rounded-3xl { border-radius: 1.5rem; }
+html[data-theme="classic"] [class~="bg-[#181919]"]:not(:disabled):hover { background-color: #000000; }
+
+
+/* ---------- Boxes have no outline: tone and soft shadow separate them instead ----------
+   Applies to cards, panels, chips and buttons. Form fields, tables and row dividers keep their lines. */
+html[data-theme] [class~="border"]:not(input):not(select):not(textarea):not(table):not(td):not(th):not(hr):not([role="radio"]) {
+  border-color: transparent !important;
+}
+/* A white box that lost its outline gets a quiet tone, so it still reads as a box on a white card. */
+html[data-theme] [class~="border"][class~="bg-white"]:not(input):not(select):not(textarea):not([role="radio"]) {
+  background-color: var(--app-surface-soft) !important;
+}
+html[data-theme] button[class~="border"][class~="bg-white"]:hover { background-color: var(--app-surface-muted) !important; }
+/* The theme switcher keeps a light track so the selected option stands out. */
+html[data-theme] [role="radiogroup"] { background-color: var(--app-surface-soft) !important; border-color: transparent !important; }
+html[data-theme] [role="radiogroup"] button:not([aria-checked="true"]):hover { background-color: var(--app-surface-muted); }
+html[data-theme="classic"] { --app-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 18px rgba(0, 0, 0, 0.08); }
+
+
+/* ---------- Form fields: one clear, consistent look in every theme ---------- */
+:root { --field-border: rgba(20, 20, 19, 0.22); }
+html[data-theme="dark"] { --field-border: rgba(250, 249, 245, 0.24); }
+html[data-theme="classic"] { --field-border: #cfd5dc; }
+@layer base {
+  /* Tailwind 4 draws a plain "border" in the text colour; use the theme's border colour unless a class says otherwise. */
+  *, ::before, ::after { border-color: var(--app-border); }
+}
+html[data-theme] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+html[data-theme] select,
+html[data-theme] textarea { border-color: var(--field-border) !important; }
+
+/* Dropdowns: the same height, padding, corners and an arrow as text fields (native menus ignore padding). */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.8rem center;
+  background-size: 1rem;
+}
+html[data-theme="dark"] select:not([multiple]):not([size]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c4c1b6' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* ---------- Classic: cards take a quiet tone so they read on a white page; boxes inside them stay white ---------- */
+html[data-theme="classic"] .rounded-3xl.bg-white:not(.modal-surface):not([role="dialog"]):not([role="alertdialog"]) { background-color: var(--app-surface-soft) !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); }
+html[data-theme="classic"] [class~="border"][class~="bg-white"]:not(input):not(select):not(textarea):not([role="radio"]) { background-color: #ffffff !important; }
+html[data-theme="classic"] button[class~="border"][class~="bg-white"]:hover { background-color: var(--app-surface-muted) !important; }
+html[data-theme="classic"] [role="radiogroup"] { background-color: #ffffff !important; }

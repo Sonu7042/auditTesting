@@ -1,0 +1,7 @@
+CREATE TABLE "ClientAuditReport" ("id" TEXT NOT NULL,"jobId" TEXT NOT NULL,"reportNumber" TEXT NOT NULL,"status" TEXT NOT NULL DEFAULT 'DRAFT',"revision" INTEGER NOT NULL DEFAULT 1,"reviewRemarks" TEXT,"approvedById" TEXT,"approvedAt" TIMESTAMP(3),"publishedAt" TIMESTAMP(3),"generatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,"updatedAt" TIMESTAMP(3) NOT NULL,CONSTRAINT "ClientAuditReport_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "ClientAuditReportHistory" ("id" TEXT NOT NULL,"reportId" TEXT NOT NULL,"action" TEXT NOT NULL,"fromStatus" TEXT,"toStatus" TEXT NOT NULL,"remarks" TEXT,"actorId" TEXT NOT NULL,"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,CONSTRAINT "ClientAuditReportHistory_pkey" PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "ClientAuditReport_jobId_key" ON "ClientAuditReport"("jobId");
+CREATE UNIQUE INDEX "ClientAuditReport_reportNumber_key" ON "ClientAuditReport"("reportNumber");
+CREATE INDEX "ClientAuditReportHistory_reportId_createdAt_idx" ON "ClientAuditReportHistory"("reportId","createdAt");
+ALTER TABLE "ClientAuditReport" ADD CONSTRAINT "ClientAuditReport_jobId_fkey" FOREIGN KEY ("jobId") REFERENCES "ClientAuditJob"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ClientAuditReportHistory" ADD CONSTRAINT "ClientAuditReportHistory_reportId_fkey" FOREIGN KEY ("reportId") REFERENCES "ClientAuditReport"("id") ON DELETE CASCADE ON UPDATE CASCADE;

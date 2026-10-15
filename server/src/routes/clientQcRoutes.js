@@ -1,0 +1,33 @@
+const express = require("express");
+const { protect } = require("../middleware/authMiddleware");
+const { authorize } = require("../middleware/roleMiddleware");
+const c = require("../controllers/clientQcController");
+const docx = require("../controllers/auditReportDocxController");
+const life = require("../controllers/reportLifecycleController");
+
+const router = express.Router();
+router.use(protect);
+router.get("/queue", authorize("ADMIN"), c.queue);
+router.get("/combined", authorize("ADMIN", "CORPORATE_MANAGER", "REGIONAL_MANAGER", "ZONAL_MANAGER", "SITE_INCHARGE", "SITE_USER"), c.combined);
+router.get("/risk-register", authorize("ADMIN", "CORPORATE_MANAGER", "REGIONAL_MANAGER", "ZONAL_MANAGER", "SITE_INCHARGE", "SITE_USER"), c.riskRegister);
+router.get("/my-reports", authorize("CORPORATE_MANAGER", "REGIONAL_MANAGER", "ZONAL_MANAGER", "SITE_INCHARGE", "SITE_USER"), c.myReports);
+const VIEW = ["ADMIN", "CORPORATE_MANAGER", "ZONAL_MANAGER", "REGIONAL_MANAGER", "SITE_INCHARGE", "SITE_USER"];
+router.get("/template/docx", authorize("ADMIN"), docx.template);
+router.get("/reports/:id/facade", authorize(...VIEW), docx.facade);
+router.get("/reports/:id/revisions", authorize(...VIEW), docx.revisions);
+router.get("/reports/:id/docx-options", authorize(...VIEW), docx.options);
+router.get("/reports/:id/docx", authorize(...VIEW), docx.download);
+router.get("/reports/:id/audit-pdf", authorize(...VIEW), docx.pdf);
+router.get("/reports/:id/pdf", authorize("ADMIN", "CORPORATE_MANAGER", "ZONAL_MANAGER", "REGIONAL_MANAGER", "SITE_INCHARGE", "SITE_USER"), c.reportPdf);
+router.get("/reports/:id", authorize("ADMIN", "CORPORATE_MANAGER", "REGIONAL_MANAGER", "ZONAL_MANAGER", "SITE_INCHARGE", "SITE_USER"), c.detail);
+router.post("/reports/:id/score", authorize("ADMIN"), c.scoreAuditors);
+router.post("/reports/:id/signoff", authorize("ADMIN", "AUDITOR", "SITE_USER", "SITE_INCHARGE"), c.signoff);
+router.post("/reports/:id/revise", authorize("ADMIN"), c.revise);
+// One report, the whole chain: lifecycle timeline and the dealer's clarifications / change requests.
+const LIFE = ["ADMIN", "AUDITOR", "CORPORATE_MANAGER", "ZONAL_MANAGER", "REGIONAL_MANAGER", "SITE_INCHARGE", "SITE_USER"];
+router.get("/reports/:id/lifecycle", authorize(...LIFE), life.lifecycle);
+router.get("/reports/:id/clarifications", authorize(...LIFE), life.listClarifications);
+router.post("/reports/:id/clarifications", authorize("CORPORATE_MANAGER", "ZONAL_MANAGER", "REGIONAL_MANAGER", "SITE_INCHARGE", "SITE_USER"), life.raiseClarification);
+router.post("/clarifications/:cid/respond", authorize("ADMIN", "AUDITOR"), life.respondClarification);
+router.post("/clarifications/:cid/close", authorize(...LIFE), life.closeClarification);
+module.exports = router;

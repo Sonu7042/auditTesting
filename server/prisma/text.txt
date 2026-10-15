@@ -1,0 +1,78 @@
+// table 1 user
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  username  String   @unique
+  password  String
+  role      Role
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  AUDITOR
+  SITE_INCHARGE
+  CORPORATE_MANAGER
+}
+
+
+
+
+// table 2 Project
+
+  generator client {
+    provider = "prisma-client-js"
+  }
+
+  datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+  }
+
+  model User {
+    id        String   @id @default(uuid())
+    name      String
+    username  String   @unique
+    password  String
+    email     String? 
+    address   String?
+    role      Role
+    status    Boolean  @default(true)
+    createdAt DateTime @default(now())
+
+    assignments ProjectAssignment[]
+  }
+
+  model Project {
+    id                String   @id @default(uuid())
+    projectName       String
+    companyName       String
+    siteAddress       String
+    checklistTemplate String
+    createdAt         DateTime @default(now())
+
+    assignments       ProjectAssignment[]
+  }
+
+  model ProjectAssignment {
+    id        String   @id @default(uuid())
+
+    projectId String
+    userId    String
+    name      String
+    role      Role
+
+    project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    user      User    @relation(fields: [userId], references: [id])
+
+    createdAt DateTime @default(now())
+  }
+
+
+  enum Role {
+    ADMIN
+    AUDITOR
+    SITE_INCHARGE
+    CORPORATE_MANAGER
+  }

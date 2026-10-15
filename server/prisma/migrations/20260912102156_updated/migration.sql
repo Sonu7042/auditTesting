@@ -1,0 +1,5 @@
+-- RenameIndex
+ALTER INDEX "AuditEscalationDelivery_scheduleId_recipientId_scheduledDate_ov" RENAME TO "AuditEscalationDelivery_scheduleId_recipientId_scheduledDat_key";
+
+-- RenameIndex
+ALTER INDEX "AuditReminderDelivery_scheduleId_auditorId_auditDate_daysBefore" RENAME TO "AuditReminderDelivery_scheduleId_auditorId_auditDate_daysBe_key";

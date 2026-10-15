@@ -1,0 +1,11 @@
+const router = require("express").Router();
+const { protect } = require("../middleware/authMiddleware");
+const { authorize } = require("../middleware/roleMiddleware");
+const controller = require("../controllers/clientAuditNcController");
+router.use(protect);
+router.get("/", authorize("ADMIN","AUDITOR","CORPORATE_MANAGER","REGIONAL_MANAGER", "ZONAL_MANAGER","SITE_INCHARGE","SITE_USER"), controller.list);
+router.get("/:ncId", authorize("ADMIN","AUDITOR","CORPORATE_MANAGER","REGIONAL_MANAGER", "ZONAL_MANAGER","SITE_INCHARGE","SITE_USER"), controller.get);
+router.post("/:ncId/capa", authorize("ADMIN","CORPORATE_MANAGER","REGIONAL_MANAGER", "ZONAL_MANAGER","SITE_INCHARGE","SITE_USER"), controller.evidenceUpload, controller.submitCapa);
+router.patch("/:ncId/review", authorize("AUDITOR"), controller.review);
+router.patch("/:ncId/admin-override-close", authorize("ADMIN"), controller.adminOverrideClose);
+module.exports = router;

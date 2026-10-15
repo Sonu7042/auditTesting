@@ -1,0 +1,2 @@
+import {api} from './client'; import {AppNotification} from '../types/domain';
+export const notificationApi={async unread(){return (await api.get('/projects/notifications')).data?.data as AppNotification[]||[]},async history(limit=30,offset=0){return (await api.get('/projects/notifications/history',{params:{limit,offset}})).data},read:(notificationId:string)=>api.patch('/projects/notifications/read',{notificationId}),readAll:()=>api.patch('/projects/notifications/read-all'),remove:(id:string)=>api.delete(`/projects/notifications/${id}`)};

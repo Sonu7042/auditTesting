@@ -1,0 +1,1 @@
+export const ROLE_LABEL = { CORPORATE_MANAGER: "Corporate manager", ZONAL_MANAGER: "Zonal manager", REGIONAL_MANAGER: "Regional (RO) manager", SITE_INCHARGE: "Site in-charge", SITE_USER: "Site user" };

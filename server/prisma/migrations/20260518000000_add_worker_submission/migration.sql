@@ -1,0 +1,2 @@
+ALTER TABLE "Worker" ADD COLUMN "sentToAdmin" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Worker" ADD COLUMN "submittedAt" TIMESTAMP(3);

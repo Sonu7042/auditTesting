@@ -1,0 +1,1697 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id          String  @id @default(uuid())
+  companyName String
+  email       String?
+  address     String?
+  po_no       String?
+  logoUrl     String? @db.Text
+  contactName  String?
+  contactPhone String?
+
+  siteRequests    SiteSetupRequest[]
+  users           User[]
+  projects        Project[]
+  auditProgrammes AuditProgramme[]
+
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id        String   @id @default(uuid())
+  fullName  String
+  email     String?  @unique
+  username  String   @unique
+  password  String
+  mustChangePassword Boolean @default(false)
+  passwordChangedAt  DateTime?
+  role      Role
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  // optional because auditor has no company
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  auditTypes UserAuditType[]
+
+  auditAssignments     AuditAuditor[]
+  corporateProjects    Project[]      @relation("CorporateManager")
+  regionalProjects     Project[]      @relation("RegionalManager")
+  siteInchargeProjects Project[]      @relation("SiteIncharge")
+  siteUserProjects     Project[]      @relation("SiteUser")
+
+  scheduledAuditors  ScheduledAuditor[]
+  auditTimers        AuditTimer[]              @relation("AuditTimers")
+  auditReports       AuditReport[]             @relation("AuditReports")
+  assessmentProgress AuditAssessmentProgress[]
+
+  createdWorkers              Worker[]                     @relation("CreatedWorkers")
+  createdMachineries          Machinery[]                  @relation("CreatedMachineries")
+  createdChemicals            Chemical[]                   @relation("CreatedChemicals")
+  auditQuestionResponses      AuditQuestionResponse[]      @relation("AuditQuestionResponses")
+  workforceNonCompliances     WorkforceNonCompliance[]     @relation("WorkforceNonCompliances")
+  auditMachineryVerifications AuditMachineryVerification[] @relation("AuditMachineryVerifications")
+  machineryNonCompliances     MachineryNonCompliance[]     @relation("MachineryNonCompliances")
+  auditChemicalVerifications  AuditChemicalVerification[]  @relation("AuditChemicalVerifications")
+  chemicalNonCompliances      ChemicalNonCompliance[]      @relation("ChemicalNonCompliances")
+  notifications               Notification[]               @relation("CreatedNotifications")
+  receivedNotifications       Notification[]               @relation("ReceivedNotifications")
+  previousNcReviews           PreviousNcReview[]
+  nextAuditUpdateSelections   NextAuditUpdateSelection[]
+  submittedDocumentQuestions  ProjectChecklistQuestion[]   @relation("SubmittedDocumentQuestions")
+  auditScheduleChanges        AuditScheduleHistory[]       @relation("AuditScheduleReschedulers")
+  auditReminderDeliveries     AuditReminderDelivery[]
+  auditEscalationDeliveries   AuditEscalationDelivery[]
+  auditorQualification        AuditorQualification?
+  auditorOnboarding           AuditorOnboarding?
+  scopes                      UserScope[]
+  auditorScores               AuditorScore[]
+  clientAuditJobAssignments   ClientAuditJobAssignment[]
+  createdClientAuditJobs      ClientAuditJob[]             @relation("ClientAuditJobCreator")
+  clientAuditSessions         ClientAuditSession[]
+}
+
+enum Role {
+  ADMIN
+  AUDITOR
+  CORPORATE_MANAGER
+  SITE_INCHARGE
+  SITE_USER
+  REGIONAL_MANAGER
+  ZONAL_MANAGER
+}
+
+model AuditType {
+  id   String @id @default(uuid())
+  name String @unique
+
+  users UserAuditType[]
+}
+
+model UserAuditType {
+  id String @id @default(uuid())
+
+  userId      String
+  auditTypeId String
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auditType AuditType @relation(fields: [auditTypeId], references: [id])
+
+  @@unique([userId, auditTypeId])
+}
+
+model Project {
+  id          String    @id @default(uuid())
+  projectName String
+  siteAddress String
+  poNumber    String?
+  issueDate   DateTime?
+  status      String    @default("Draft")
+  dealerName  String?
+  dealerPhone String?
+  dealerEmail String?
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  corporateManagerId String?
+  regionalManagerId  String?
+  siteInchargeId     String?
+  siteUserId         String?
+
+  audits Audit[]
+
+  corporateManager User? @relation("CorporateManager", fields: [corporateManagerId], references: [id])
+  regionalManager  User? @relation("RegionalManager", fields: [regionalManagerId], references: [id])
+  siteIncharge     User? @relation("SiteIncharge", fields: [siteInchargeId], references: [id])
+  siteUser         User? @relation("SiteUser", fields: [siteUserId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  schedules                   AuditSchedule[]
+  auditTimers                 AuditTimer[]
+  auditReports                AuditReport[]
+  assessmentProgress          AuditAssessmentProgress[]
+  workers                     Worker[]
+  machineries                 Machinery[]
+  chemicals                   Chemical[]
+  workforceNonCompliances     WorkforceNonCompliance[]
+  auditMachineryVerifications AuditMachineryVerification[]
+  machineryNonCompliances     MachineryNonCompliance[]
+  auditChemicalVerifications  AuditChemicalVerification[]
+  chemicalNonCompliances      ChemicalNonCompliance[]
+  projectChecklistSections    ProjectChecklistSection[]
+  dealerLocation              DealerLocation?
+}
+
+model AuditProgramme {
+  id            String   @id @default(uuid())
+  companyId     String
+  name          String
+  code          String
+  programmeType String
+  financialYear String
+  status        String   @default("DRAFT")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company           Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  locations         DealerLocation[]
+  checklistVersions ClientChecklistVersion[]
+
+  @@unique([companyId, code])
+  @@index([companyId, programmeType, status])
+}
+
+model DealerLocation {
+  id                   String   @id @default(uuid())
+  programmeId          String
+  projectId            String?  @unique
+  zone                 String
+  regionalOffice       String
+  dealerName           String
+  dealerCode           String
+  locationName         String
+  locationCode         String
+  address              String
+  city                 String?
+  district             String?
+  state                String?
+  latitude             Float
+  longitude            Float
+  geofenceRadiusM      Int      @default(200)
+  contactName          String
+  contactPhone         String
+  contactEmail         String
+  electricalSupplyType String?
+  sapCode              String?
+  parentCode           String?
+  madbCode             String?
+  category             String?
+  cityClassification   String?
+  retailFormat         String?
+  profile              Json?
+  status               String   @default("SETUP")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  programme          AuditProgramme              @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  project            Project?                    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  facilities         Facility[]
+  sharedMappings     SharedFacilityMapping[]
+  checklistSnapshots LocationChecklistSnapshot[]
+  clientAuditJobs    ClientAuditJob[]
+
+  @@unique([programmeId, locationCode])
+  @@index([programmeId, zone, regionalOffice])
+  @@index([dealerCode])
+}
+
+model Facility {
+  id            String   @id @default(uuid())
+  locationId    String
+  facilityType  String
+  displayName   String?
+  tier          String?
+  ciLevel       String?
+  format        String?
+  workshopType  String?
+  stockyardType String?
+  sellsPv       Boolean  @default(false)
+  sellsBev      Boolean  @default(false)
+  sellsCv       Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  location DealerLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([locationId, facilityType])
+  @@index([facilityType, ciLevel])
+}
+
+model SharedFacilityMapping {
+  id           String   @id @default(uuid())
+  locationId   String
+  facilityCode String
+  description  String?
+  arrangement  String   @default("SHARED")
+  usedBy       Json
+  quantity     Int      @default(1)
+  auditAtSite  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  location DealerLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([locationId, facilityCode])
+}
+
+model ClientChecklistVersion {
+  id            String    @id @default(uuid())
+  programmeId   String
+  name          String
+  version       String
+  status        String    @default("DRAFT")
+  effectiveDate DateTime?
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  programme AuditProgramme              @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  items     ClientChecklistItem[]
+  snapshots LocationChecklistSnapshot[]
+
+  @@unique([programmeId, version])
+  @@index([programmeId, status])
+}
+
+model ClientChecklistItem {
+  id                String   @id @default(uuid())
+  versionId         String
+  moduleCode        String
+  sectionName       String
+  questionCode      String
+  questionText      String
+  expectedCondition String?
+  discipline        String   @default("INFRASTRUCTURE")
+  responseType      String   @default("COMPLIANCE")
+  severityOnFail    String   @default("MEDIUM")
+  mahindraPriority  String   @default("IMPORTANT")
+  weight            Float    @default(1)
+  evidenceRequired  Boolean  @default(false)
+  minimumEvidence   Int      @default(0)
+  naAllowed         Boolean  @default(true)
+  naReasonRequired  Boolean  @default(true)
+  measurementUnit   String?
+  minimumValue      Float?
+  maximumValue      Float?
+  regulationRef     String?
+  applicabilityRule Json?
+  sortOrder         Int      @default(0)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  version ClientChecklistVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@unique([versionId, questionCode])
+  @@index([versionId, moduleCode, sortOrder])
+}
+
+model LocationChecklistSnapshot {
+  id               String   @id @default(uuid())
+  locationId       String
+  versionId        String
+  checklistName    String
+  checklistVersion String
+  itemCount        Int
+  configuration    Json
+  generatedAt      DateTime @default(now())
+
+  location  DealerLocation                  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  version   ClientChecklistVersion          @relation(fields: [versionId], references: [id], onDelete: Restrict)
+  items     LocationChecklistSnapshotItem[]
+  auditJobs ClientAuditJob[]
+
+  @@unique([locationId, versionId])
+  @@index([locationId, generatedAt])
+}
+
+model LocationChecklistSnapshotItem {
+  id           String @id @default(uuid())
+  snapshotId   String
+  sourceItemId String
+  moduleCode   String
+  sectionName  String
+  questionCode String
+  sortOrder    Int
+  itemData     Json
+
+  snapshot          LocationChecklistSnapshot     @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  responses         ClientAuditQuestionResponse[]
+  reportCorrections ClientAuditReportCorrection[]
+
+  @@unique([snapshotId, sourceItemId])
+  @@index([snapshotId, moduleCode, sortOrder])
+}
+
+model AuditorQualification {
+  id                     String    @id @default(uuid())
+  userId                 String    @unique
+  skills                 Json
+  supportedRegions       Json
+  calibrationScore       Float
+  backgroundVerified     Boolean   @default(false)
+  platformCertified      Boolean   @default(false)
+  shadowAuditsCompleted  Int       @default(0)
+  authorityLetterNumber  String?
+  certificationExpiresAt DateTime?
+  status                 String    @default("INACTIVE")
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ClientAuditJob {
+  id               String    @id @default(uuid())
+  locationId       String
+  snapshotId       String
+  createdById      String
+  auditCycle       String
+  auditType        String    @default("PERIODIC")
+  scheduledStart   DateTime
+  scheduledEnd     DateTime
+  requiredSkills   Json
+  readiness        Json
+  status           String    @default("SCHEDULED")
+  notes            String?
+  dealerNotifiedAt DateTime?
+  facilityType     String?
+  includesShared   Boolean   @default(true)
+  isDemo           Boolean   @default(false)
+  visitGroup       String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  notices     ClientAuditNotice[]
+  location    DealerLocation             @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  snapshot    LocationChecklistSnapshot  @relation(fields: [snapshotId], references: [id], onDelete: Restrict)
+  createdBy   User                       @relation("ClientAuditJobCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  assignments ClientAuditJobAssignment[]
+  sessions    ClientAuditSession[]
+  report      ClientAuditReport?
+
+  @@index([locationId, scheduledStart])
+  @@index([status, scheduledStart])
+}
+
+model ClientAuditReport {
+  id            String    @id @default(uuid())
+  jobId         String    @unique
+  reportNumber  String    @unique
+  status        String    @default("DRAFT")
+  revision      Int       @default(1)
+  reviewRemarks String?
+  approvedById  String?
+  approvedAt    DateTime?
+  publishedAt   DateTime?
+  qcScore       Float?
+  scoreSnapshot Json?
+  qcBreakdown   Json?
+  anomalies     Json?
+  signedByName        String?
+  signedByDesignation String?
+  signedAt            DateTime?
+  signatureUrl        String?   @db.Text
+  debriefNotes        String?
+  generatedAt   DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  job         ClientAuditJob                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  history     ClientAuditReportHistory[]
+  corrections ClientAuditReportCorrection[]
+}
+
+// A frozen copy of an issued report version, kept when a revision is opened so every revision can still be downloaded.
+model ClientAuditReportRevision {
+  id         String   @id @default(uuid())
+  reportId   String
+  revision   Int
+  issuedAt   DateTime?
+  reason     String?
+  openedById String?
+  payload    Json
+  createdAt  DateTime @default(now())
+
+  @@unique([reportId, revision])
+}
+
+model ClientAuditReportHistory {
+  id         String            @id @default(uuid())
+  reportId   String
+  action     String
+  fromStatus String?
+  toStatus   String
+  remarks    String?
+  actorId    String
+  createdAt  DateTime          @default(now())
+  report     ClientAuditReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId, createdAt])
+}
+
+model ClientAuditReportCorrection {
+  id                        String    @id @default(uuid())
+  reportId                  String
+  snapshotItemId            String?
+  category                  String
+  priority                  String    @default("MEDIUM")
+  instruction               String
+  dueDate                   DateTime?
+  status                    String    @default("OPEN")
+  resolution                String?
+  correctedResult           String?
+  correctedObservation      String?
+  correctedMeasurementValue Float?
+  correctedNaReason         String?
+  raisedById                String
+  submittedById             String?
+  submittedAt               DateTime?
+  reviewedById              String?
+  reviewedAt                DateTime?
+  reviewRemarks             String?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  report       ClientAuditReport                     @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  snapshotItem LocationChecklistSnapshotItem?        @relation(fields: [snapshotItemId], references: [id], onDelete: Restrict)
+  evidence     ClientAuditReportCorrectionEvidence[]
+
+  @@index([reportId, status])
+  @@index([snapshotItemId])
+}
+
+model ClientAuditReportCorrectionEvidence {
+  id           String   @id @default(uuid())
+  correctionId String
+  imageUrl     String
+  publicId     String?
+  imageName    String?
+  mimeType     String?
+  fileHash     String
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  correction ClientAuditReportCorrection @relation(fields: [correctionId], references: [id], onDelete: Cascade)
+
+  @@index([correctionId, createdAt])
+}
+
+model ClientAuditSession {
+  id                      String    @id @default(uuid())
+  jobId                   String
+  auditorId               String
+  status                  String    @default("IN_PROGRESS")
+  deviceId                String
+  checkInLatitude         Float
+  checkInLongitude        Float
+  gpsAccuracy             Float
+  distanceFromSiteM       Float
+  checkInEvidenceUrl      String
+  checkInEvidencePublicId String?
+  checkInEvidenceName     String?
+  checkInEvidenceMimeType String?
+  evidenceHash            String
+  checkedInAt             DateTime  @default(now())
+  endedAt                 DateTime?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  job        ClientAuditJob                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  auditor    User                          @relation(fields: [auditorId], references: [id], onDelete: Restrict)
+  events     ClientAuditSessionEvent[]
+  responses  ClientAuditQuestionResponse[]
+  completion ClientAuditCompletion?
+
+  @@unique([jobId, auditorId])
+  @@index([auditorId, status])
+  @@index([jobId, status])
+}
+
+model ClientAuditCompletion {
+  id                  String   @id @default(uuid())
+  sessionId           String   @unique
+  finalRemarks        String
+  declarationAccepted Boolean
+  signatureUrl        String
+  signatureHash       String
+  summary             Json
+  completedAt         DateTime @default(now())
+  createdAt           DateTime @default(now())
+
+  session ClientAuditSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model ClientAuditQuestionResponse {
+  id                String    @id @default(uuid())
+  sessionId         String
+  snapshotItemId    String
+  responseStatus    String    @default("DRAFT")
+  answer            String?
+  result            String?
+  observation       String?
+  measurementValue  Float?
+  naReason          String?
+  recommendation    String?
+  responsiblePerson String?
+  targetDate        DateTime?
+  closedOnSpot      Boolean   @default(false)
+  correctionComment String?
+  revision          Int       @default(1)
+  submittedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  session       ClientAuditSession            @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  snapshotItem  LocationChecklistSnapshotItem @relation(fields: [snapshotItemId], references: [id], onDelete: Restrict)
+  evidence      ClientAuditResponseEvidence[]
+  revisions     ClientAuditResponseRevision[]
+  nonCompliance ClientAuditNonCompliance?
+
+  @@unique([sessionId, snapshotItemId])
+  @@index([sessionId, responseStatus])
+  @@index([snapshotItemId])
+}
+
+model ClientAuditNonCompliance {
+  id                String    @id @default(uuid())
+  ncNumber          String    @unique
+  responseId        String    @unique
+  jobId             String
+  sessionId         String
+  snapshotItemId    String
+  status            String    @default("OPEN")
+  severity          String
+  priority          String
+  observation       String
+  recommendation    String?
+  rootCause         String?
+  correctiveAction  String?
+  preventiveAction  String?
+  responsiblePerson String?
+  targetDate        DateTime?
+  capaSubmittedById String?
+  capaSubmittedAt   DateTime?
+  auditorRemarks    String?
+  reviewedById      String?
+  reviewedAt        DateTime?
+  closedAt          DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  response ClientAuditQuestionResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  evidence ClientAuditNcEvidence[]
+  history  ClientAuditNcHistory[]
+
+  @@index([jobId, status])
+  @@index([sessionId])
+  @@index([status, targetDate])
+}
+
+model ClientAuditNcEvidence {
+  id           String   @id @default(uuid())
+  ncId         String
+  evidenceType String   @default("CAPA")
+  imageUrl     String
+  publicId     String?
+  imageName    String?
+  mimeType     String?
+  fileHash     String
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  nonCompliance ClientAuditNonCompliance @relation(fields: [ncId], references: [id], onDelete: Cascade)
+
+  @@index([ncId, createdAt])
+}
+
+model ClientAuditNcHistory {
+  id         String   @id @default(uuid())
+  ncId       String
+  action     String
+  fromStatus String?
+  toStatus   String
+  remarks    String?
+  actorId    String
+  createdAt  DateTime @default(now())
+
+  nonCompliance ClientAuditNonCompliance @relation(fields: [ncId], references: [id], onDelete: Cascade)
+
+  @@index([ncId, createdAt])
+}
+
+model ClientAuditResponseEvidence {
+  id         String   @id @default(uuid())
+  responseId String
+  kind       String   @default("ISSUE")
+  imageUrl   String
+  publicId   String?
+  imageName  String?
+  mimeType   String?
+  fileHash   String
+  createdAt  DateTime @default(now())
+
+  response ClientAuditQuestionResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@index([responseId, createdAt])
+}
+
+model ClientAuditResponseRevision {
+  id               String   @id @default(uuid())
+  responseId       String
+  revisionNumber   Int
+  previousResponse Json
+  changedAt        DateTime @default(now())
+
+  response ClientAuditQuestionResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  @@unique([responseId, revisionNumber])
+}
+
+model ClientAuditSessionEvent {
+  id        String   @id @default(uuid())
+  sessionId String
+  eventType String
+  eventData Json?
+  createdAt DateTime @default(now())
+
+  session ClientAuditSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+
+model ClientAuditJobAssignment {
+  id             String    @id @default(uuid())
+  jobId          String
+  auditorId      String
+  assignedSkills Json
+  assignmentRole String    @default("MEMBER")
+  track          String    @default("ALL")
+  status         String    @default("ASSIGNED")
+  notifiedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  job     ClientAuditJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  auditor User           @relation(fields: [auditorId], references: [id], onDelete: Restrict)
+
+  @@unique([jobId, auditorId])
+  @@index([auditorId, status])
+}
+
+model Audit {
+  id              String  @id @default(uuid())
+  auditType       String
+  cycleNumber     Int     @default(1)
+  previousAuditId String?
+  previousAudit   Audit?  @relation("AuditCycles", fields: [previousAuditId], references: [id], onDelete: SetNull)
+  nextAudits      Audit[] @relation("AuditCycles")
+
+  checklistType     String
+  checklistTemplate ChecklistTemplate @relation(fields: [checklistType], references: [id])
+
+  frequency      String
+  numberOfAudits Int
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+
+  auditors AuditAuditor[]
+
+  schedules                   AuditSchedule[]
+  auditTimers                 AuditTimer[]
+  auditReports                AuditReport[]
+  assessmentProgress          AuditAssessmentProgress[]
+  auditQuestionResponses      AuditQuestionResponse[]
+  previousNcReviews           PreviousNcReview[]           @relation("CurrentAuditPreviousNcReviews")
+  sourceNcReviews             PreviousNcReview[]           @relation("SourceAuditPreviousNcReviews")
+  nextAuditUpdateSelections   NextAuditUpdateSelection[]
+  workforceNonCompliances     WorkforceNonCompliance[]
+  machineryNonCompliances     MachineryNonCompliance[]
+  chemicalNonCompliances      ChemicalNonCompliance[]
+  auditMachineryVerifications AuditMachineryVerification[]
+  auditChemicalVerifications  AuditChemicalVerification[]
+}
+
+model AuditAuditor {
+  id String @id @default(uuid())
+
+  auditId    String
+  userId     String
+  isNotified Boolean @default(false)
+
+  audit Audit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditSchedule {
+  id String @id @default(uuid())
+
+  projectId String
+  auditId   String   @unique
+  date      DateTime
+
+  project Project @relation(fields: [projectId], references: [id])
+  audit   Audit   @relation(fields: [auditId], references: [id])
+
+  auditors             ScheduledAuditor[]
+  history              AuditScheduleHistory[]
+  reminderDeliveries   AuditReminderDelivery[]
+  escalationDeliveries AuditEscalationDelivery[]
+
+  createdAt DateTime @default(now())
+}
+
+model AuditReminderDelivery {
+  id            String    @id @default(uuid())
+  scheduleId    String
+  auditorId     String
+  auditDate     DateTime
+  daysBefore    Int
+  status        String    @default("PENDING")
+  attempts      Int       @default(1)
+  lastAttemptAt DateTime  @default(now())
+  sentAt        DateTime?
+  error         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  schedule AuditSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  auditor  User          @relation(fields: [auditorId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, auditorId, auditDate, daysBefore])
+  @@index([status, lastAttemptAt])
+}
+
+model AuditEscalationDelivery {
+  id                 String    @id @default(uuid())
+  scheduleId         String
+  recipientId        String
+  scheduledDate      DateTime
+  overdueDays        Int
+  status             String    @default("PENDING")
+  attempts           Int       @default(1)
+  lastAttemptAt      DateTime  @default(now())
+  notificationSentAt DateTime?
+  emailSentAt        DateTime?
+  error              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  schedule  AuditSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  recipient User          @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, recipientId, scheduledDate, overdueDays])
+  @@index([status, lastAttemptAt])
+}
+
+model AuditScheduleHistory {
+  id              String        @id @default(uuid())
+  scheduleId      String
+  previousDate    DateTime
+  newDate         DateTime
+  reason          String
+  rescheduledById String
+  schedule        AuditSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  rescheduledBy   User          @relation("AuditScheduleReschedulers", fields: [rescheduledById], references: [id])
+  createdAt       DateTime      @default(now())
+
+  @@index([scheduleId, createdAt])
+}
+
+model AuditTimer {
+  id String @id @default(uuid())
+
+  projectId String
+  auditId   String
+  auditorId String
+  elapsedMs Int       @default(0)
+  startedAt DateTime  @default(now())
+  stoppedAt DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  audit   Audit   @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  auditor User    @relation("AuditTimers", fields: [auditorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, auditId, auditorId])
+}
+
+model AuditReport {
+  id String @id @default(uuid())
+
+  projectId            String
+  auditId              String
+  auditorId            String
+  technicalDescription String
+  observations         String
+  subcontractors       String?
+  auditorSignatureUrl  String?
+  visitedSections      Json
+  status               String    @default("Open")
+  completedAt          DateTime?
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  audit   Audit   @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  auditor User    @relation("AuditReports", fields: [auditorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, auditId, auditorId])
+}
+
+model ScheduledAuditor {
+  id String @id @default(uuid())
+
+  scheduleId String
+  userId     String
+
+  schedule AuditSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id])
+}
+
+model ChecklistTemplate {
+  id String @id @default(uuid())
+
+  name      String
+  auditType String
+
+  createdAt DateTime @default(now())
+
+  isFrozen Boolean @default(false)
+
+  sections Section[]
+
+  audits Audit[]
+}
+
+model Section {
+  id String @id @default(uuid())
+
+  title          String
+  mainMenu       String?
+  mainMenuNumber String?
+  sectionNumber  String?
+  templateId     String
+
+  template  ChecklistTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  isLocked  Boolean           @default(false)
+  questions Question[]
+}
+
+model Question {
+  id String @id @default(uuid())
+
+  text           String
+  isLocked       Boolean @default(false)
+  dueDateText    String?
+  questionNumber String?
+  sectionId      String
+
+  section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+}
+
+model ProjectChecklistSection {
+  id String @id @default(uuid())
+
+  title           String
+  mainMenu        String?
+  mainMenuNumber  String?
+  sectionNumber   String?
+  sourceSectionId String?
+  projectId       String
+  checklistType   String
+
+  project        Project                    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  isLocked       Boolean                    @default(false)
+  isCustomized   Boolean                    @default(false)
+  addedByRole    String?
+  approvalStatus String                     @default("Approved")
+  approvalRemark String?
+  questions      ProjectChecklistQuestion[]
+
+  @@index([projectId, checklistType])
+}
+
+model ProjectChecklistQuestion {
+  id String @id @default(uuid())
+
+  text                          String
+  isLocked                      Boolean   @default(false)
+  isCustomized                  Boolean   @default(false)
+  addedByRole                   String?
+  approvalStatus                String    @default("Approved")
+  approvalRemark                String?
+  dueDateText                   String?
+  documentDueDate               DateTime?
+  documentImageUrl              String?
+  documentImagePublicId         String?
+  documentImageName             String?
+  documentImageType             String?
+  documentComment               String?
+  documentRejectionRemark       String?
+  documentCorrectionComment     String?
+  documentCorrectionRequestedAt DateTime?
+  documentSentToAdmin           Boolean   @default(false)
+  documentSubmittedAt           DateTime?
+  documentStatus                String    @default("Pending")
+  documentSubmittedById         String?
+  questionNumber                String?
+  sourceQuestionId              String?
+  sectionId                     String
+
+  section           ProjectChecklistSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  documentSubmitter User?                   @relation("SubmittedDocumentQuestions", fields: [documentSubmittedById], references: [id], onDelete: SetNull)
+  auditResponses    AuditQuestionResponse[]
+}
+
+model AuditQuestionResponse {
+  id String @id @default(uuid())
+
+  questionId     String
+  auditorId      String
+  auditId        String
+  responseType   String
+  observation    String?
+  severity       String?
+  preventivePlan String?
+  riskAssessment String?
+  description1   String?
+  description2   String?
+
+  question ProjectChecklistQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  auditor  User                     @relation("AuditQuestionResponses", fields: [auditorId], references: [id], onDelete: Cascade)
+  audit    Audit                    @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  evidence AuditQuestionEvidence[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([questionId, auditorId, auditId])
+  @@index([auditId, responseType])
+}
+
+model AuditQuestionEvidence {
+  id String @id @default(uuid())
+
+  responseId    String
+  evidenceType  String
+  imageUrl      String
+  imagePublicId String?
+  imageName     String?
+  imageType     String?
+
+  response AuditQuestionResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model WorkforceNonCompliance {
+  id String @id @default(uuid())
+
+  projectId            String
+  auditId              String?
+  auditorId            String
+  subcontractedCompany String
+  workforce            String
+  workforceRole        String
+  phoneNumber          String
+  description1         String
+  description2         String?
+
+  project  Project                          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  audit    Audit?                           @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  auditor  User                             @relation("WorkforceNonCompliances", fields: [auditorId], references: [id], onDelete: Cascade)
+  evidence WorkforceNonComplianceEvidence[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WorkforceNonComplianceEvidence {
+  id String @id @default(uuid())
+
+  nonComplianceId String
+  evidenceType    String
+  imageUrl        String
+  imagePublicId   String?
+  imageName       String?
+  imageType       String?
+
+  nonCompliance WorkforceNonCompliance @relation(fields: [nonComplianceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model AuditMachineryVerification {
+  id String @id @default(uuid())
+
+  projectId             String
+  auditId               String?
+  auditorId             String
+  checkedMachineries    Json
+  checkedMachineryCount Int     @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  audit   Audit?  @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  auditor User    @relation("AuditMachineryVerifications", fields: [auditorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, auditId, auditorId])
+}
+
+model MachineryNonCompliance {
+  id String @id @default(uuid())
+
+  projectId     String
+  auditId       String?
+  auditorId     String
+  machineryName String
+  description1  String
+  description2  String?
+
+  project  Project                          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  audit    Audit?                           @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  auditor  User                             @relation("MachineryNonCompliances", fields: [auditorId], references: [id], onDelete: Cascade)
+  evidence MachineryNonComplianceEvidence[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MachineryNonComplianceEvidence {
+  id String @id @default(uuid())
+
+  nonComplianceId String
+  evidenceType    String
+  imageUrl        String
+  imagePublicId   String?
+  imageName       String?
+  imageType       String?
+
+  nonCompliance MachineryNonCompliance @relation(fields: [nonComplianceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model AuditChemicalVerification {
+  id String @id @default(uuid())
+
+  projectId            String
+  auditId              String?
+  auditorId            String
+  checkedChemicals     Json
+  checkedChemicalCount Int     @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  audit   Audit?  @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  auditor User    @relation("AuditChemicalVerifications", fields: [auditorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, auditId, auditorId])
+}
+
+model ChemicalNonCompliance {
+  id String @id @default(uuid())
+
+  projectId    String
+  auditId      String?
+  auditorId    String
+  chemicalName String
+  description1 String
+  description2 String?
+
+  project  Project                         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  audit    Audit?                          @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  auditor  User                            @relation("ChemicalNonCompliances", fields: [auditorId], references: [id], onDelete: Cascade)
+  evidence ChemicalNonComplianceEvidence[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChemicalNonComplianceEvidence {
+  id String @id @default(uuid())
+
+  nonComplianceId String
+  evidenceType    String
+  imageUrl        String
+  imagePublicId   String?
+  imageName       String?
+  imageType       String?
+
+  nonCompliance ChemicalNonCompliance @relation(fields: [nonComplianceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id String @id @default(uuid())
+
+  title         String
+  message       String
+  type          String
+  recipientRole String? @default("ADMIN")
+  recipientId   String?
+  link          String?
+  projectId     String?
+  auditId       String?
+  sectionId     String?
+  questionId    String?
+  createdById   String?
+  isRead        Boolean @default(false)
+
+  createdBy User? @relation("CreatedNotifications", fields: [createdById], references: [id], onDelete: SetNull)
+  recipient User? @relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([recipientRole, isRead])
+  @@index([recipientId, isRead])
+}
+
+model PreviousNcReview {
+  id String @id @default(uuid())
+
+  currentAuditId String
+  sourceAuditId  String
+  auditorId      String
+  sourceType     String
+  sourceId       String
+  sourceSnapshot Json
+
+  currentStatus  String    @default("OPEN")
+  auditorRemarks String?
+  closureDate    DateTime?
+
+  rootCauseAnalysis        String?
+  correctiveActionsTaken   String?
+  responsiblePerson        String?
+  managementCompletionDate DateTime?
+
+  actionRequired  String?
+  actionOwner     String?
+  targetDate      DateTime?
+  currentProgress String?
+  closureRemarks  String?
+
+  reviewedAt DateTime?
+
+  currentAudit    Audit                       @relation("CurrentAuditPreviousNcReviews", fields: [currentAuditId], references: [id], onDelete: Cascade)
+  sourceAudit     Audit                       @relation("SourceAuditPreviousNcReviews", fields: [sourceAuditId], references: [id], onDelete: Cascade)
+  auditor         User                        @relation(fields: [auditorId], references: [id], onDelete: Cascade)
+  closureEvidence PreviousNcClosureEvidence[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([currentAuditId, auditorId, sourceType, sourceId])
+  @@index([currentAuditId, auditorId])
+}
+
+model PreviousNcClosureEvidence {
+  id String @id @default(uuid())
+
+  reviewId      String
+  imageUrl      String
+  imagePublicId String?
+  imageName     String?
+  imageType     String?
+
+  review PreviousNcReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model AuditAssessmentProgress {
+  id String @id @default(uuid())
+
+  projectId       String
+  auditId         String
+  auditorId       String
+  visitedSections Json
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  audit   Audit   @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  auditor User    @relation(fields: [auditorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, auditId, auditorId])
+}
+
+model NextAuditUpdateSelection {
+  id String @id @default(uuid())
+
+  sourceAuditId   String
+  auditorId       String
+  sourceType      String
+  sourceId        String
+  sourceSnapshot  Json
+  selectionStatus String @default("QUEUED")
+
+  sourceAudit Audit @relation(fields: [sourceAuditId], references: [id], onDelete: Cascade)
+  auditor     User  @relation(fields: [auditorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([sourceAuditId, auditorId, sourceType, sourceId])
+  @@index([sourceAuditId, auditorId])
+}
+
+model Worker {
+  id String @id @default(uuid())
+
+  fullName    String
+  workerId    String  @unique
+  phoneNumber String?
+
+  workerRole            String
+  status                String    @default("Pending")
+  rejectionRemark       String?
+  sentToAdmin           Boolean   @default(false)
+  submittedAt           DateTime?
+  correctionComment     String?
+  correctionRequestedAt DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User   @relation("CreatedWorkers", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model WorkerRole {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Machinery {
+  id String @id @default(uuid())
+
+  machineryName              String
+  machineryId                String
+  inspectionDocumentUrl      String?
+  inspectionDocumentPublicId String?
+  inspectionDocumentName     String?
+  inspectionDocumentType     String?
+  machineryImageUrl          String?
+  machineryImagePublicId     String?
+  machineryImageName         String?
+  machineryImageType         String?
+  status                     String    @default("Pending")
+  rejectionRemark            String?
+  sentToAdmin                Boolean   @default(false)
+  submittedAt                DateTime?
+  correctionComment          String?
+  correctionRequestedAt      DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User   @relation("CreatedMachineries", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, machineryId])
+}
+
+model Chemical {
+  id String @id @default(uuid())
+
+  chemicalName            String
+  chemicalId              String
+  safetyDataSheetUrl      String?
+  safetyDataSheetPublicId String?
+  safetyDataSheetName     String?
+  safetyDataSheetType     String?
+  chemicalImageUrl        String?
+  chemicalImagePublicId   String?
+  chemicalImageName       String?
+  chemicalImageType       String?
+  status                  String    @default("Pending")
+  rejectionRemark         String?
+  sentToAdmin             Boolean   @default(false)
+  submittedAt             DateTime?
+  correctionComment       String?
+  correctionRequestedAt   DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User   @relation("CreatedChemicals", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([projectId, chemicalId])
+}
+
+model SiteSetupRequest {
+  id            String    @id @default(uuid())
+  companyId     String
+  status        String    @default("DRAFT")
+  source        String    @default("MANUAL")
+  data          Json
+  readiness     Int       @default(0)
+  reviewRemarks String?
+  createdById   String?
+  submittedAt   DateTime?
+  reviewedById  String?
+  reviewedAt    DateTime?
+  locationId    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status])
+}
+
+// An auditor asks Back-Admin to change something on their ID card (name, contact details, photo...).
+model AuditorChangeRequest {
+  id          String    @id @default(uuid())
+  userId      String
+  changes     Json
+  reason      String?
+  status      String    @default("PENDING")
+  remarks     String?
+  decidedById String?
+  decidedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId, status])
+}
+
+model AuditorOnboarding {
+  id                  String    @id @default(uuid())
+  userId              String    @unique
+  status              String    @default("CREATED")
+  phone               String?
+  baseLocation        String?
+  dateOfBirth         DateTime?
+  emergencyContact    String?
+  notes               String?
+  videoProgress       Int       @default(0)
+  quizScore           Float?
+  quizAttempts        Int       @default(0)
+  quizAnswers         Json?
+  demoAnswers         Json?
+  trainingSubmittedAt DateTime?
+  demoScore           Float?
+  reviewScore         Float?
+  reviewRemarks       String?
+  reviewedById        String?
+  reviewedAt          DateTime?
+  approvalRemarks     String?
+  approvedById        String?
+  approvedAt          DateTime?
+  rejectionReason     String?
+  credentialsSentAt   DateTime?
+  photoUrl            String?   @db.Text
+  auditorCode         String?   @unique
+  idIssuedAt          DateTime?
+  emailSent           Boolean   @default(false)
+  events              Json      @default("[]")
+  createdById         String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditorScore {
+  id          String   @id @default(uuid())
+  userId      String
+  source      String
+  score       Float
+  reference   String?
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, source, createdAt])
+}
+
+model TrainingContent {
+  id        String   @id
+  videoUrl  String?
+  passMark  Int      @default(80)
+  quiz      Json
+  demo      Json
+  updatedAt DateTime @updatedAt
+}
+
+model ClientAuditNotice {
+  id        String    @id @default(uuid())
+  jobId     String
+  kind      String
+  dueAt     DateTime
+  status    String    @default("PENDING")
+  sentAt    DateTime?
+  recipient String?
+  note      String?
+  createdAt DateTime  @default(now())
+
+  job ClientAuditJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, kind])
+  @@index([status, dueAt])
+}
+
+model ChecklistProposal {
+  id            String    @id @default(uuid())
+  programmeId   String
+  proposedById  String
+  jobId         String?
+  moduleCode    String
+  discipline    String
+  sectionName   String
+  questionText  String
+  reason        String
+  severity      String    @default("MEDIUM")
+  reach         String    @default("TIER_FACILITY")
+  reachData     Json?
+  status        String    @default("PENDING_ADMIN")
+  adminById     String?
+  adminAt       DateTime?
+  adminRemarks  String?
+  sgsById       String?
+  sgsAt         DateTime?
+  sgsRemarks    String?
+  createdItemId String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model UserScope {
+  id               String  @id @default(uuid())
+  userId           String
+  companyId        String?
+  zone             String?
+  regionalOffice   String?
+  locationId       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AwardPeriod {
+  id         String   @id @default(uuid())
+  label      String
+  type       String   @default("QUARTER")
+  startsAt   DateTime
+  endsAt     DateTime
+  topN       Int      @default(3)
+  status     String   @default("OPEN")
+  snapshot   Json?
+  closedAt   DateTime?
+  createdAt  DateTime @default(now())
+
+  certificates Certificate[]
+}
+
+model Certificate {
+  id          String    @id @default(uuid())
+  periodId    String
+  level       String
+  metric      String
+  rank        Int
+  score       Float
+  nodeKey     String
+  nodeName    String
+  companyName String?
+  code        String    @unique
+  status      String    @default("DRAFT")
+  issuedAt    DateTime?
+  approvedById String?
+  createdAt   DateTime  @default(now())
+
+  period AwardPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+
+  @@index([periodId, level, metric])
+}
+
+
+// ---- Help centre: policies, guides, training and support ------------------------------------
+
+// A policy people must read and accept (terms, privacy, code of conduct...). Each edit that matters is published as a new version.
+model Policy {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  title       String
+  audience    String[]
+  body        String   @db.Text
+  version     Int      @default(1)
+  requiresAck Boolean  @default(true)
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PolicyAcknowledgement {
+  id             String   @id @default(uuid())
+  policyId       String
+  userId         String
+  version        Int
+  acknowledgedAt DateTime @default(now())
+  ipAddress      String?
+  userAgent      String?
+
+  @@unique([userId, policyId, version])
+  @@index([policyId, version])
+}
+
+// Progress through the first-login guide, per user and guide.
+model UserGuideProgress {
+  id          String    @id @default(uuid())
+  userId      String
+  guideKey    String
+  stepIndex   Int       @default(0)
+  completedAt DateTime?
+  skippedAt   DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, guideKey])
+}
+
+model TrainingModule {
+  id           String   @id @default(uuid())
+  title        String
+  summary      String?
+  category     String   @default("GENERAL")
+  audience     String[]
+  contentType  String   @default("ARTICLE")
+  videoUrl     String?
+  body         String   @db.Text
+  minutes      Int      @default(5)
+  sortOrder    Int      @default(0)
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model TrainingProgress {
+  id          String   @id @default(uuid())
+  moduleId    String
+  userId      String
+  completedAt DateTime @default(now())
+
+  @@unique([moduleId, userId])
+}
+
+model SupportTicket {
+  id           String   @id @default(uuid())
+  ticketNumber String   @unique
+  userId       String
+  category     String
+  priority     String   @default("NORMAL")
+  subject      String
+  description  String   @db.Text
+  status       String   @default("OPEN")
+  reportId     String?
+  assignedToId String?
+  resolvedAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  messages SupportMessage[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+model SupportMessage {
+  id        String   @id @default(uuid())
+  ticketId  String
+  authorId  String
+  fromStaff Boolean  @default(false)
+  body      String   @db.Text
+  internal  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+}
+
+// A site user or auditor asks for a correction to a site's master data (contact, address, GPS, supply type).
+// Master data changes only after Back-Admin approves; the previous values are kept on the request for the audit trail.
+model SiteChangeRequest {
+  id              String    @id @default(uuid())
+  locationId      String
+  requestedById   String
+  changes         Json
+  reason          String
+  photoUrl        String?   @db.Text
+  status          String    @default("PENDING")
+  decidedById     String?
+  decidedAt       DateTime?
+  decisionRemarks String?
+  previousValues  Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([locationId, status])
+  @@index([requestedById])
+}
+
+// After a report is issued, the dealer can ask for a clarification or request a change. Back-Admin or the lead auditor
+// answers; an accepted change opens a new revision of the report, and issuing that revision marks the change done.
+model ReportClarification {
+  id                 String    @id @default(uuid())
+  reportId           String
+  revisionRaised     Int       @default(1)
+  kind               String
+  snapshotItemId     String?
+  message            String
+  raisedById         String
+  status             String    @default("OPEN")
+  response           String?
+  respondedById      String?
+  respondedAt        DateTime?
+  resolvedInRevision Int?
+  closedAt           DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([reportId, status])
+}
