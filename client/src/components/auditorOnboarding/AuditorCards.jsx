@@ -7,7 +7,7 @@ import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
 import InitialAvatar from "../InitialAvatar";
 import ExcelImport, { ImportButton } from "../common/ExcelImport";
-import { Field, Modal, PageTitle, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, Modal, PageTitle, SkeletonCard, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 import { STATUS_META, SKILL_LABELS, TAG_META } from "./meta";
 import { Pill, ScoreRing } from "./shared";
 
@@ -71,7 +71,13 @@ export default function AuditorCards() {
         ))}
       </div>
 
-      {loading ? <p className="text-sm text-gray-500">Loading...</p> : shown.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      ) : shown.length === 0 ? (
         <div className={`${cardClass} text-center text-sm text-gray-500`}>No auditors here yet. Add an auditor to begin onboarding.</div>
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">

@@ -3,7 +3,7 @@ import axios from "axios";
 import { Download } from "lucide-react";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, cardClass, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { PageTitle, SkeletonTable, cardClass, inputClass, lightBtn } from "../siteOnboarding/ui";
 
 const META = { VALID: ["Valid", "bg-[#eaf8ed] text-[#287a37]"], EXPIRING: ["Expiring soon", "bg-[#fff3e0] text-[#9a5200]"], EXPIRED: ["Expired", "bg-[#fdecec] text-[#b42318]"], NO_DATE: ["No date", "bg-[#f1f1f1] text-[#555]"] };
 
@@ -15,7 +15,7 @@ export default function InstrumentsRegister() {
   const [q, setQ] = useState("");
   useEffect(() => { axios.get(`${domain}/admin-hub/instruments`).then(({ data: d }) => setData(d)); }, []);
   const rows = useMemo(() => (data?.rows || []).filter((r) => (!filter || (filter === "SHORT" ? r.short : r.status === filter)) && (!q || `${r.site} ${r.code} ${r.tool} ${r.company}`.toLowerCase().includes(q.toLowerCase()))), [data, filter, q]);
-  if (!data) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!data) return <div><Header /><SkeletonTable rows={6} /></div>;
   const t = data.totals;
   const tiles = [["", "All tools", t.tools], ["VALID", "Valid", t.valid], ["EXPIRING", "Expiring in 30 days", t.expiring], ["EXPIRED", "Expired", t.expired], ["SHORT", "Short of required", t.short]];
   const exportCsv = () => {

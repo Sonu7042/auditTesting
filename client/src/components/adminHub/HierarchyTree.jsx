@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Building2, ChevronDown, ChevronRight, MapPin, Network, Store, Users } from "lucide-react";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, cardClass } from "../siteOnboarding/ui";
+import { PageTitle, SkeletonTable, cardClass } from "../siteOnboarding/ui";
 
 const ICON = { COMPANY: Building2, ZONE: Network, REGIONAL_OFFICE: MapPin, SITE: Store };
 const LEVEL = { COMPANY: "Company", ZONE: "Zone", REGIONAL_OFFICE: "Regional office", SITE: "Site" };
@@ -36,7 +36,7 @@ export default function HierarchyTree() {
   const [data, setData] = useState(null);
   const [open, setOpen] = useState({});
   useEffect(() => { axios.get(`${domain}/admin-hub/hierarchy`).then(({ data: d }) => setData(d)); }, []);
-  if (!data) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!data) return <div><Header /><SkeletonTable rows={6} /></div>;
   const toggle = (key, isOpen) => setOpen((o) => ({ ...o, [key]: !isOpen }));
   const base = window.location.pathname.startsWith("/admin-dashboard") ? "/admin-dashboard" : "/user-dashboard";
 

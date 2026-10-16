@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import domain from "../../api/domain";
 import Header from "../adminDashboard/Header";
 import { useConfirm } from "../common/confirmContext";
-import { Field, Modal, PageTitle, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, Modal, PageTitle, SkeletonPage, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 import AuditorIdCard from "./AuditorIdCard";
 import { SKILL_LABELS } from "./meta";
 import { resizePhoto } from "./photoResize";
@@ -92,7 +92,7 @@ export default function MyProfile() {
   useEffect(() => { load(); }, [load]);
 
   if (error) return <div><Header /><PageTitle title="My profile" subtitle={error} /></div>;
-  if (!data) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!data) return <div><Header /><SkeletonPage /></div>;
   const { card: c, requests, history } = data;
   const approved = c.status === "APPROVED" && c.auditorCode;
   const pending = requests.some((r) => r.status === "PENDING");

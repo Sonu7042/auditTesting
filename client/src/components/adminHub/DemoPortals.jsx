@@ -4,7 +4,7 @@ import { ExternalLink } from "lucide-react";
 import toast from "react-hot-toast";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, cardClass, darkBtn } from "../siteOnboarding/ui";
+import { PageTitle, SkeletonPage, cardClass, darkBtn } from "../siteOnboarding/ui";
 
 // Back-Admin opens any role's portal in its own window to show the client how it looks and what each person can see.
 // The preview is a real, read-only "view as" session: the same screens and data, no passwords shared, no changes possible.
@@ -38,7 +38,7 @@ export default function DemoPortals() {
     } catch { win.close(); } finally { setBusy(""); }
   };
 
-  if (!personas) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!personas) return <div><Header /><SkeletonPage /></div>;
   return (
     <div>
       <Header />

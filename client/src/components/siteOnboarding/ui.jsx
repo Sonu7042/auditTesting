@@ -103,3 +103,50 @@ export function Modal({ title, children, onClose, wide }) {
     : modalElement;
 }
 
+export function Skeleton({ className = "" }) {
+  return <div className={`skeleton rounded-xl ${className}`} />;
+}
+
+export function SkeletonCard() {
+  return (
+    <div className="rounded-3xl bg-white p-5 shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
+      <Skeleton className="h-14 w-14 rounded-2xl" />
+      <Skeleton className="mt-4 h-5 w-3/4" />
+      <Skeleton className="mt-2 h-4 w-1/2" />
+    </div>
+  );
+}
+
+export function SkeletonTable({ rows = 5 }) {
+  return (
+    <div className="rounded-3xl bg-white p-6 shadow-[0_2px_6px_rgba(0,0,0,0.08)] space-y-4">
+      <Skeleton className="h-6 w-1/4 mb-3" />
+      {[...Array(rows)].map((_, i) => (
+        <div key={i} className="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0">
+          <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-3 w-1/3" />
+          </div>
+          <Skeleton className="h-8 w-20 shrink-0 rounded-lg" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function SkeletonPage() {
+  return (
+    <div className="space-y-6">
+      <div className="rounded-3xl bg-white p-6 shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
+        <Skeleton className="h-4 w-32 mb-2" />
+        <Skeleton className="h-7 w-64" />
+      </div>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}

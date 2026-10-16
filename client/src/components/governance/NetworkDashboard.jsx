@@ -5,7 +5,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 import { AlertTriangle, ChevronRight, Trophy } from "lucide-react";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { ProgressBar, cardClass } from "../siteOnboarding/ui";
+import { ProgressBar, SkeletonPage, cardClass } from "../siteOnboarding/ui";
 import { ScoreRing } from "../auditorOnboarding/shared";
 import { DISCIPLINE_LABELS, RATING_STYLES } from "../auditFlow/helpers";
 import { SiteTrail } from "../auditFlow/SiteTrail";
@@ -34,7 +34,7 @@ export default function NetworkDashboard() {
     if (!admin && data && data.nodes.length === 1 && data.level !== "site") drill(data.nodes[0]);
   }, [data]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!data) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!data) return <div><Header /><SkeletonPage /></div>;
   const t = data.totals;
   const company = data.companies.find((c) => c.id === path.companyId);
   const crumbs = [

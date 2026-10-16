@@ -5,7 +5,7 @@ import { useConfirm } from "../common/confirmContext";
 import Header from "../adminDashboard/Header";
 import { SiteTrail } from "./SiteTrail";
 import domain from "../../api/domain";
-import { Field, PageTitle, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, PageTitle, SkeletonTable, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 import { DISCIPLINE_LABELS, SEVERITY_STYLES, fmtDate } from "./helpers";
 
 const STATUS = { PENDING_ADMIN: ["Back-Admin review", "bg-[#fff6e8] text-[#9a5200]"], PENDING_SGS: ["SGS sign-off", "bg-[#f1ebfd] text-[#6b3fc4]"], APPROVED: ["Approved", "bg-[#eaf8ed] text-[#287a37]"], REJECTED: ["Rejected", "bg-[#fdecec] text-[#b42318]"] };
@@ -46,7 +46,7 @@ export default function ChecklistProposals({ embedded = false, locationCode = ""
       {!embedded && <PageTitle crumbs={[{ label: "Site Onboarding", to: "/admin-dashboard/site-onboarding" }, { label: "Proposed points" }]} title="Proposed checklist points"
         subtitle="Points auditors suggest from site conditions. Back-Admin reviews first, then SGS signs off and chooses how widely the point applies. An approved point creates a new checklist version for upcoming audits only." />}
       <div className="mb-4 flex gap-2">{[["OPEN", "Awaiting action"], ["APPROVED", "Approved"], ["REJECTED", "Rejected"], ["ALL", "All"]].map(([k, t]) => <button key={k} onClick={() => setFilter(k)} className={`rounded-full px-4 py-2 text-sm ${filter === k ? "bg-[#181919] text-white" : "bg-white shadow-sm"}`}>{t}</button>)}</div>
-      {list === null ? <p className="text-sm text-gray-500">Loading...</p> : shown.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>Nothing here.</div> : (
+      {list === null ? <SkeletonTable rows={4} /> : shown.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>Nothing here.</div> : (
         <div className="space-y-3">
           {shown.map((p) => (
             <button key={p.id} onClick={() => { setOpen(p); setRemarks(""); setReach("TIER_FACILITY"); setStates(""); }} className="w-full rounded-2xl bg-white p-4 text-left shadow-[0_2px_6px_rgba(0,0,0,0.06)] hover:shadow-md">

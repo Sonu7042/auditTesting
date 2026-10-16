@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import axios from "axios";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
+import { SkeletonTable } from "../siteOnboarding/ui";
 
 const emptyCorrection = { snapshotItemId: "", category: "", priority: "MEDIUM", instruction: "", dueDate: "" };
 const emptyResolution = { resolution: "", correctedResult: "", correctedObservation: "", correctedMeasurementValue: "", correctedNaReason: "" };
@@ -17,7 +18,7 @@ export default function ClientAuditReports() {
   const role = localStorage.getItem("role");
   const admin = role === "ADMIN";
   const auditor = role === "AUDITOR";
-  const [reports, setReports] = useState([]);
+  const [reports, setReports] = useState(null);
   const [selected, setSelected] = useState(null);
   const [correction, setCorrection] = useState(emptyCorrection);
   const [resolution, setResolution] = useState(emptyResolution);
@@ -47,11 +48,11 @@ export default function ClientAuditReports() {
   }, [selected]);
 
   const stats = useMemo(() => ({
-    total: reports.length,
-    draft: reports.filter((item) => item.status === "DRAFT").length,
-    qc: reports.filter((item) => ["UNDER_REVIEW", "CORRECTION_SUBMITTED"].includes(item.status)).length,
-    correction: reports.filter((item) => item.status === "CORRECTION_REQUIRED").length,
-    published: reports.filter((item) => item.status === "PUBLISHED").length,
+    total: (reports || []).length,
+    draft: (reports || []).filter((item) => item.status === "DRAFT").length,
+    qc: (reports || []).filter((item) => ["UNDER_REVIEW", "CORRECTION_SUBMITTED"].includes(item.status)).length,
+    correction: (reports || []).filter((item) => item.status === "CORRECTION_REQUIRED").length,
+    published: (reports || []).filter((item) => item.status === "PUBLISHED").length,
   }), [reports]);
 
   const run = async (request) => {
@@ -91,11 +92,18 @@ export default function ClientAuditReports() {
       {Object.entries(stats).map(([key, value]) => <div key={key} className="rounded-2xl bg-white p-4 shadow"><b className="text-2xl">{value}</b><div className="text-xs uppercase text-gray-500">{key}</div></div>)}
     </div>
     <div className="space-y-3">
-      {reports.map((report) => <button key={report.id} onClick={() => setSelected(report)} className="w-full rounded-2xl border bg-white p-4 text-left hover:border-blue-300">
-        <div className="flex flex-wrap items-center justify-between gap-3"><div><b>{report.reportNumber}</b><div className="text-sm text-gray-500">{report.job.location.dealerName} - {report.job.location.locationName} · Revision {report.revision}</div></div><span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold">{report.status}</span></div>
-        <div className="mt-2 text-xs text-gray-500">{report.corrections?.length || 0} correction point(s) · Click to open</div>
-      </button>)}
-      {!reports.length && <div className="rounded-2xl bg-white p-8 text-center text-gray-500">No reports are available for this account.</div>}
+      {reports === null ? (
+        <SkeletonTable rows={4} />
+      ) : reports.length === 0 ? (
+        <div className="rounded-2xl bg-white p-8 text-center text-gray-500">No reports are available for this account.</div>
+      ) : (
+        reports.map((report) => (
+          <button key={report.id} onClick={() => setSelected(report)} className="w-full rounded-2xl border bg-white p-4 text-left hover:border-blue-300">
+            <div className="flex flex-wrap items-center justify-between gap-3"><div><b>{report.reportNumber}</b><div className="text-sm text-gray-500">{report.job.location.dealerName} - {report.job.location.locationName} · Revision {report.revision}</div></div><span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold">{report.status}</span></div>
+            <div className="mt-2 text-xs text-gray-500">{report.corrections?.length || 0} correction point(s) · Click to open</div>
+          </button>
+        ))
+      )}
     </div>
     {selected && createPortal(<div className="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-black/60 p-3 sm:p-6" onMouseDown={(event) => event.target === event.currentTarget && setSelected(null)}>
       <div role="dialog" aria-modal="true" className="my-auto max-h-[calc(100dvh-24px)] w-full max-w-5xl overflow-y-auto rounded-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-48px)] sm:rounded-3xl">

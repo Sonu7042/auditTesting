@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { useConfirm } from "../common/confirmContext";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { Field, Modal, PageTitle, ProgressBar, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, Modal, PageTitle, ProgressBar, SkeletonPage, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 import CameraCapture from "./CameraCapture";
 import SignaturePad from "./SignaturePad";
 import { DISCIPLINE_LABELS, FACILITY_LABELS, SEVERITY_STYLES, TRACK_LABELS } from "./helpers";
@@ -70,7 +70,7 @@ export default function AuditRun() {
     modules: s.modules.map((m) => ({ ...m, sections: m.sections.map((sec) => ({ ...sec, questions: sec.questions.map((q) => (q.snapshotItemId === snapshotItemId ? { ...q, response } : q)) })) })),
   }));
 
-  if (!details) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!details) return <div><Header /><SkeletonPage /></div>;
   const job = details.job;
   const submitted = questions.filter((q) => q.response?.responseStatus === "SUBMITTED").length;
   const percent = questions.length ? Math.round((submitted / questions.length) * 100) : 0;

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { CalendarClock, MapPin, PlayCircle } from "lucide-react";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, cardClass, darkBtn } from "../siteOnboarding/ui";
+import { PageTitle, SkeletonCard, cardClass, darkBtn } from "../siteOnboarding/ui";
 import { FACILITY_LABELS, TRACK_LABELS, fmtDateTime } from "./helpers";
 
 const STATUS = { SCHEDULED: "bg-[#e8f1fd] text-[#1e61ad]", CONFIRMED: "bg-[#e8f1fd] text-[#1e61ad]", IN_PROGRESS: "bg-[#fff6e8] text-[#9a5200]", COMPLETED: "bg-[#eaf8ed] text-[#287a37]", CANCELLED: "bg-[#f1f1f1] text-[#555]" };
@@ -25,7 +25,13 @@ export default function AuditorJobs() {
     <div>
       <Header />
       <PageTitle crumbs={[{ label: "Audit Execution" }]} title="New Report" subtitle="Your assigned audits. Open one to check in, answer the checklist with photo evidence, and submit." />
-      {jobs === null ? <p className="text-sm text-gray-500">Loading...</p> : jobs.length === 0 ? (
+      {jobs === null ? (
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      ) : jobs.length === 0 ? (
         <div className={`${cardClass} text-center text-sm text-gray-500`}>No audits are assigned to you yet.</div>
       ) : (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
