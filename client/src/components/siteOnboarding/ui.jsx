@@ -82,7 +82,7 @@ export function ProgressBar({ value }) {
 export function Modal({ title, children, onClose, wide }) {
   return (
     <div className="anim-fade fixed inset-0 z-[200] flex items-center justify-center bg-[#141413]/45 p-4 backdrop-blur-[2px]">
-      <div className={`anim-rise modal-surface max-h-[90vh] w-full overflow-y-auto rounded-3xl bg-white p-6 shadow-[0_24px_60px_rgba(20,20,19,0.22)] ${wide ? "max-w-3xl" : "max-w-lg"}`}>
+      <div className={`anim-rise modal-surface max-h-[90vh] w-full overflow-y-auto rounded-3xl bg-white m-auto p-6 shadow-[0_24px_60px_rgba(20,20,19,0.22)] ${wide ? "max-w-3xl" : "max-w-lg"}`}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">{title}</h2>
           <button type="button" onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100" aria-label="Close">✕</button>
@@ -92,3 +92,4 @@ export function Modal({ title, children, onClose, wide }) {
     </div>
   );
 }
+

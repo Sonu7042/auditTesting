@@ -101,7 +101,7 @@ export default function SiteOnboarding() {
       )}
 
       {showAdd && (
-        <Modal title="Add company" onClose={() => setShowAdd(false)}>
+        <Modal  title="Add company" onClose={() => setShowAdd(false)}>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <CompanyLogo company={{ companyName: form.companyName || "?", logoUrl: form.logoUrl }} />
