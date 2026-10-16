@@ -337,10 +337,42 @@ html[data-theme="dark"] .theme-toggle {
   color: var(--app-text) !important;
 }
 
-html[data-theme="dark"] * {
-  scrollbar-color: var(--app-border) var(--app-bg);
+/* Thin custom scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
 }
 
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.45);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.75);
+}
+
+html[data-theme="dark"] * {
+  scrollbar-color: var(--app-border) transparent;
+}
+
+html[data-theme="dark"] *::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.35);
+}
 
 /* Hide scrollbar but keep scroll working */
 .no-scrollbar::-webkit-scrollbar {
@@ -393,12 +425,22 @@ span, p, a, button , li , label , input , textarea , link{
 .skeleton {
   background: linear-gradient(
     90deg,
-    #f3f4f6 25%,
-    #e5e7eb 37%,
-    #f3f4f6 63%
+    #eef0f3 25%,
+    #e2e5e9 37%,
+    #eef0f3 63%
   );
   background-size: 1200px 100%;
-  animation: shimmer 1.4s infinite linear;
+  animation: shimmer 1.5s infinite linear;
+}
+
+html[data-theme="dark"] .skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.12) 37%,
+    rgba(255, 255, 255, 0.05) 63%
+  );
+  background-size: 1200px 100%;
 }
 /* ---- Interface polish (spacing, focus, numerals, motion) ---- */
 :where(a, button, [role="button"], summary, input, select, textarea):focus-visible {

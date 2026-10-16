@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, cardClass } from "../siteOnboarding/ui";
+import { PageTitle, SkeletonCard, cardClass } from "../siteOnboarding/ui";
 import { SiteLink } from "./SiteTrail";
 import { FACILITY_LABELS, TRACK_LABELS, fmtDateTime } from "./helpers";
 
@@ -14,7 +14,13 @@ export default function InProgress() {
     <div>
       <Header />
       <PageTitle crumbs={[{ label: "Audit Execution", to: "/admin-dashboard/stage/5" }, { label: "In progress" }]} title="Audits in progress" subtitle="Live view of each track: who has checked in, how far from the site, and whether they have submitted." />
-      {jobs === null ? <p className="text-sm text-gray-500">Loading...</p> : jobs.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No audits are scheduled or running.</div> : (
+      {jobs === null ? (
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          {[...Array(4)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      ) : jobs.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No audits are scheduled or running.</div> : (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
           {jobs.map((j) => (
             <div key={j.id} className={cardClass}>

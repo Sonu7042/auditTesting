@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, cardClass } from "../siteOnboarding/ui";
+import { PageTitle, SkeletonPage, cardClass } from "../siteOnboarding/ui";
 import { SKILL_LABELS, STATUS_META, TAG_META } from "../auditorOnboarding/meta";
 
 // How each auditor is doing: the rolling score from the last three QC reviews decides whether they can be planned
@@ -21,7 +21,7 @@ export default function AuditorPerformance() {
     return (
       <div>
         <Header />
-        <p className="text-sm text-gray-500">Loading...</p>
+        <SkeletonPage />
       </div>
     );
   const t = data.totals;

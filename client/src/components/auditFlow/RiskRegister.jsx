@@ -3,7 +3,7 @@ import axios from "axios";
 import { Download } from "lucide-react";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, cardClass, lightBtn } from "../siteOnboarding/ui";
+import { PageTitle, SkeletonTable, cardClass, lightBtn } from "../siteOnboarding/ui";
 import { SiteLink } from "./SiteTrail";
 import { DISCIPLINE_LABELS, FACILITY_LABELS, SEVERITY_STYLES, fmtDate } from "./helpers";
 
@@ -50,7 +50,7 @@ export default function RiskRegister() {
         {admin && <label className="flex items-center gap-2"><input type="checkbox" checked={demo} onChange={(e) => setDemo(e.target.checked)} />Include demo audits</label>}
         <span className="text-gray-500">{shown.length} finding(s)</span>
       </div>
-      {rows === null ? <p className="text-sm text-gray-500">Loading...</p> : shown.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No findings match.</div> : (
+      {rows === null ? <SkeletonTable rows={5} /> : shown.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No findings match.</div> : (
         <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
           <table className="w-full text-sm">
             <thead className="bg-[#f3f5f7] text-left text-xs uppercase text-gray-500"><tr><th className="p-3">NC</th><th>Site</th><th>Finding</th><th>Risk</th><th>Priority</th><th>Due</th><th>Status</th></tr></thead>

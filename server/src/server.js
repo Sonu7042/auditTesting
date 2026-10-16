@@ -40,6 +40,9 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/help", helpRoutes);
 app.use("/api/site-change-requests", require("./routes/siteChangeRoutes"));
 app.use("/api/admin-hub", require("./routes/adminHubRoutes"));
+app.use("/api/projects", require("./routes/projectRoutes"));
+app.use("/api/user-dashboard", require("./routes/userDashboardRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
 
 const PORT = process.env.PORT || 8000;
 

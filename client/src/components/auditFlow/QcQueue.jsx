@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, cardClass } from "../siteOnboarding/ui";
+import { PageTitle, SkeletonTable, cardClass } from "../siteOnboarding/ui";
 import { SiteLink } from "./SiteTrail";
 import { FACILITY_LABELS, RATING_STYLES, fmtDateTime } from "./helpers";
 
@@ -27,7 +27,7 @@ export default function QcQueue({ anomaliesOnly = false }) {
         title={anomaliesOnly ? "Anomaly flags" : "QC queue"}
         subtitle={anomaliesOnly ? "Audits with suspicious patterns: very short audits, unusually high scores, reused photos or heavy N/A use. Flags prompt a closer look; they are not a verdict." : "Check each auditor's scoring against the photo evidence before a report is released to the dealer."} />
       {!anomaliesOnly && <div className="mb-4 flex gap-2">{GROUPS.map(([k, t]) => <button key={k} onClick={() => setGroup(k)} className={`rounded-full px-4 py-2 text-sm ${group === k ? "bg-[#181919] text-white" : "bg-white shadow-sm"}`}>{t}</button>)}</div>}
-      {reports === null ? <p className="text-sm text-gray-500">Loading...</p> : shown.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>{anomaliesOnly ? "No anomalies flagged." : "Nothing in this list."}</div> : (
+      {reports === null ? <SkeletonTable rows={5} /> : shown.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>{anomaliesOnly ? "No anomalies flagged." : "Nothing in this list."}</div> : (
         <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
           <table className="w-full text-sm">
             <thead className="bg-[#f3f5f7] text-left text-xs uppercase text-gray-500"><tr><th className="p-3">Report</th><th>Site</th><th>Auditors</th><th>Score</th><th>Findings</th><th>Flags</th><th>Status</th></tr></thead>

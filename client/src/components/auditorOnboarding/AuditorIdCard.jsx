@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import domain from "../../api/domain";
 import DocumentViewer from "../common/DocumentViewer";
 import { useConfirm } from "../common/confirmContext";
-import { lightBtn } from "../siteOnboarding/ui";
+import { Skeleton, lightBtn } from "../siteOnboarding/ui";
 import { SKILL_LABELS } from "./meta";
 import { resizePhoto } from "./photoResize";
 
@@ -61,7 +61,20 @@ export default function AuditorIdCard({ userId = null, onChanged, allowPhoto = t
   useEffect(() => { load(); }, [load]);
 
   if (error) return <p className="rounded-xl bg-[#f3f5f7] p-3 text-sm text-gray-600">{error}</p>;
-  if (!data) return <p className="text-sm text-gray-500">Loading ID card...</p>;
+  if (!data) {
+    return (
+      <div className="w-full max-w-[520px] rounded-3xl bg-white p-6 shadow-[0_2px_6px_rgba(0,0,0,0.08)] space-y-4">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-16 w-16 rounded-2xl shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
+        <Skeleton className="h-28 w-full rounded-2xl" />
+      </div>
+    );
+  }
   const c = data.card;
   const initials = c.fullName.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 

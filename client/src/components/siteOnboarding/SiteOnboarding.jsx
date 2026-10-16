@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
 import ExcelImport, { ImportButton } from "../common/ExcelImport";
-import { CompanyLogo, Field, Modal, PageTitle, cardClass, darkBtn, inputClass, lightBtn } from "./ui";
+import { CompanyLogo, Field, Modal, PageTitle, SkeletonCard, cardClass, darkBtn, inputClass, lightBtn } from "./ui";
 
 const emptyCompany = { companyName: "", email: "", address: "", contactName: "", contactPhone: "", logoUrl: "" };
 
@@ -65,7 +65,11 @@ export default function SiteOnboarding() {
       />
 
       {loading ? (
-        <p className="text-sm text-gray-500">Loading...</p>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       ) : companies.length === 0 ? (
         <div className={`${cardClass} text-center`}>
           <Building2 className="mx-auto mb-2 text-gray-500" />

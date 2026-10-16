@@ -4,7 +4,7 @@ import { Plus, Trash2 } from "lucide-react";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
 import { useConfirm } from "../common/confirmContext";
-import { Field, PageTitle, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, PageTitle, SkeletonPage, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 
 const newQuestion = () => ({ id: `q${Date.now()}`, text: "", options: ["", "", "", ""], answer: 0 });
 const newDemo = () => ({ id: `d${Date.now()}`, title: "", scenario: "", imageUrl: "", expected: "NOT_OK", expectedNote: "" });
@@ -17,7 +17,7 @@ export default function TrainingContentAdmin() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { axios.get(`${domain}/auditor-onboarding/content`).then(({ data }) => setContent(data.content)); }, []);
-  if (!content) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!content) return <div><Header /><SkeletonPage /></div>;
 
   const set = (patch) => setContent((c) => ({ ...c, ...patch }));
   const setQuestion = (i, patch) => set({ quiz: content.quiz.map((q, k) => (k === i ? { ...q, ...patch } : q)) });

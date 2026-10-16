@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useConfirm } from "../common/confirmContext";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { Field, PageTitle, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, PageTitle, SkeletonCard, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 import DocumentViewer from "../common/DocumentViewer";
 import { fmtDate } from "../auditFlow/helpers";
 
@@ -18,7 +18,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 export default function Awards() {
   const admin = localStorage.getItem("role") === "ADMIN";
   const [periods, setPeriods] = useState([]);
-  const [certs, setCerts] = useState([]);
+  const [certs, setCerts] = useState(null);
   const [form, setForm] = useState({ label: "Q2 FY 2026-27", type: "QUARTER", startsAt: "2026-07-01", endsAt: today(), topN: 3 });
   const [busy, setBusy] = useState(false);
   const { confirm, ask } = useConfirm();
@@ -65,7 +65,13 @@ export default function Awards() {
 
       <section>
         <h2 className="mb-3 text-lg font-semibold">{admin ? "Certificates" : "My certificates"}</h2>
-        {certs.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No certificates yet.</div> : (
+        {certs === null ? (
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : certs.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No certificates yet.</div> : (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
             {certs.map((c) => (
               <div key={c.id} className="rounded-3xl bg-white p-5 shadow-[0_2px_6px_rgba(0,0,0,0.08)]">

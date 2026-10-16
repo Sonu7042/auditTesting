@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Bell, RefreshCw, X } from "lucide-react";
 import useNotifications from "../../hooks/useNotifications";
 import { resolveNotificationLink } from "../../utils/notificationRoutes";
+import { Skeleton } from "../siteOnboarding/ui";
 
 const formatNotificationTime = (date) => {
   if (!date) return "";
@@ -130,10 +131,20 @@ export default function AuditorNotifications() {
                 </article>
               ))}
             </div>
+          ) : loading ? (
+            <div className="space-y-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="rounded-2xl border border-[#ececec] bg-white p-5 space-y-2">
+                  <Skeleton className="h-5 w-1/3" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/4" />
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="flex h-full items-center justify-center py-20">
               <p className="text-sm text-gray-500">
-                {loading ? "Loading notifications..." : "No notifications available"}
+                No notifications available
               </p>
             </div>
           )}

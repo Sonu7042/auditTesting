@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import domain from "../../api/domain";
 import Header from "../adminDashboard/Header";
 import { useConfirm } from "../common/confirmContext";
-import { Field, Modal, PageTitle, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, Modal, PageTitle, SkeletonTable, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 import TicketThread from "./TicketThread";
 import { STATUS_LABEL, STATUS_STYLE } from "./ticketMeta";
 
@@ -29,7 +29,7 @@ function Tickets() {
       <div className="mb-4 flex flex-wrap gap-2">
         {[["OPEN,IN_PROGRESS,WAITING_ON_USER", "Active"], ["RESOLVED,CLOSED", "Resolved"], ["", "All"]].map(([v, l]) => <button key={l} type="button" onClick={() => setStatus(v)} className={`min-h-9 rounded-full px-4 text-sm font-medium ${status === v ? "bg-[#181919] text-white" : "bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"}`}>{l}</button>)}
       </div>
-      {list === null ? <p className="text-sm text-gray-500">Loading...</p> : list.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>Nothing here.</div> : (
+      {list === null ? <SkeletonTable rows={4} /> : list.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>Nothing here.</div> : (
         <div className="space-y-2.5">
           {list.map((t) => (
             <button key={t.id} type="button" onClick={() => setView(t.id)} className={`${cardClass} flex w-full flex-wrap items-center justify-between gap-3 !p-4 text-left transition hover:-translate-y-0.5`}>
@@ -58,7 +58,7 @@ function Policies() {
     setEdit(null); load();
   };
   const showAcks = async (p) => { const { data } = await axios.get(`${domain}/help/admin/policies/${p.id}/acknowledgements`); setPeople({ policy: p, ...data }); };
-  if (!list) return <p className="text-sm text-gray-500">Loading...</p>;
+  if (!list) return <SkeletonTable rows={4} />;
   return (
     <div>
       <div className="mb-4 flex justify-end"><button type="button" className={darkBtn} onClick={() => setEdit({ title: "", body: "", audience: ["ALL"], requiresAck: true })}><Plus size={16} /> New policy</button></div>
@@ -102,7 +102,7 @@ function Training() {
   useEffect(() => { load(); }, [load]);
   const save = async () => { await axios.request({ method: edit.id ? "put" : "post", url: `${domain}/help/admin/training${edit.id ? `/${edit.id}` : ""}`, data: edit, showSuccessToast: true }); setEdit(null); load(); };
   const remove = async (m) => { if (!(await confirm({ title: `Delete "${m.title}"?`, tone: "danger", message: "The module and everyone's progress on it are removed.", confirmLabel: "Delete module" }))) return; await axios.delete(`${domain}/help/admin/training/${m.id}`); toast.success("Deleted"); load(); };
-  if (!list) return <p className="text-sm text-gray-500">Loading...</p>;
+  if (!list) return <SkeletonTable rows={4} />;
   return (
     <div>
       <div className="mb-4 flex justify-end"><button type="button" className={darkBtn} onClick={() => setEdit({ title: "", summary: "", body: "", videoUrl: "", category: "GENERAL", minutes: 5, audience: ["ALL"], published: true })}><Plus size={16} /> New module</button></div>

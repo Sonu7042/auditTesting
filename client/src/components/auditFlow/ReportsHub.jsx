@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
 import ReportMenu from "../common/ReportMenu";
-import { PageTitle, ProgressBar, cardClass, inputClass } from "../siteOnboarding/ui";
+import { PageTitle, ProgressBar, SkeletonTable, cardClass, inputClass } from "../siteOnboarding/ui";
 import DocumentViewer from "../common/DocumentViewer";
 import { SiteLink } from "./SiteTrail";
 import { FACILITY_LABELS, RATING_STYLES } from "./helpers";
@@ -145,7 +145,7 @@ export default function ReportsHub() {
       <Header />
       <PageTitle crumbs={[{ label: "Client Submission" }]} title="Reports" subtitle="One report per facility and audit type, plus the combined score for the site once all its facility audits are in. Each audit has its Word and PDF report, per audit type or combined." actions={admin && <ReportMenu />} />
       <div className="mb-5 flex items-center gap-4"><input className={`${inputClass} !mt-0 max-w-xs`} placeholder="Search site, dealer or code" value={search} onChange={(e) => setSearch(e.target.value)} />{admin && <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showDemo} onChange={(e) => setShowDemo(e.target.checked)} />Include demo audits</label>}</div>
-      {reports === null ? <p className="text-sm text-gray-500">Loading...</p> : sites.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No reports yet.</div> : (
+      {reports === null ? <SkeletonTable rows={4} /> : sites.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No reports yet.</div> : (
         <div className="grid grid-cols-1 gap-5">
           {sites.map((s) => (
             <section key={s.location.id} className={cardClass}>
