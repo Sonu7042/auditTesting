@@ -27,8 +27,6 @@ const getApiErrorMessage = (error, fallback = "Something went wrong") => {
   return fallback;
 };  
 
-
-
 const successMethods = new Set(["post", "put", "patch", "delete"]);
 
 const getApiSuccessMessage = (response) => {
