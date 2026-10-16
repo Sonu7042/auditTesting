@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 
 export const inputClass =
@@ -80,8 +81,13 @@ export function ProgressBar({ value }) {
 }
 
 export function Modal({ title, children, onClose, wide }) {
-  return (
-    <div className="anim-fade fixed inset-0 z-[200] flex items-center justify-center bg-[#141413]/45 p-4 backdrop-blur-[2px]">
+  const modalElement = (
+    <div
+      className="anim-fade fixed inset-0 z-[9999] flex h-screen w-screen items-center justify-center bg-[#141413]/45 p-4 backdrop-blur-[2px]"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && onClose) onClose();
+      }}
+    >
       <div className={`anim-rise modal-surface max-h-[90vh] w-full overflow-y-auto rounded-3xl bg-white m-auto p-6 shadow-[0_24px_60px_rgba(20,20,19,0.22)] ${wide ? "max-w-3xl" : "max-w-lg"}`}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">{title}</h2>
@@ -91,5 +97,9 @@ export function Modal({ title, children, onClose, wide }) {
       </div>
     </div>
   );
+
+  return typeof document !== "undefined"
+    ? createPortal(modalElement, document.body)
+    : modalElement;
 }
 
