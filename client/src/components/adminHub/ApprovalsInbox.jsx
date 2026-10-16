@@ -4,14 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, cardClass } from "../siteOnboarding/ui";
+import { PageTitle, SkeletonPage, cardClass } from "../siteOnboarding/ui";
 
 // One inbox for everything waiting on Back-Admin, across every stage of the programme.
 export default function ApprovalsInbox() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   useEffect(() => { axios.get(`${domain}/admin-hub/approvals`).then(({ data: d }) => setData(d)); }, []);
-  if (!data) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!data) return <div><Header /><SkeletonPage /></div>;
 
   return (
     <div>

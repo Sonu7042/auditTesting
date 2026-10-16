@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 import { useConfirm } from "../common/confirmContext";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { Field, Modal, PageTitle, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, Modal, PageTitle, SkeletonPage, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 import { SKILL_LABELS, STATUS_META, TAG_META } from "./meta";
 import { Pill, ScoreRing } from "./shared";
 import AuditorIdCard, { PhotoUpload } from "./AuditorIdCard";
@@ -82,7 +82,7 @@ export default function AuditorDetail() {
     load();
   };
 
-  if (!d) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!d) return <div><Header /><SkeletonPage /></div>;
   const { auditor: a, onboarding: o, content, scores, thresholds, changeRequests = [] } = d;
   if (!o) return <div><Header /><PageTitle title={a.fullName} subtitle="This auditor was created before the onboarding flow existed." /></div>;
   const done = completedSteps(a.status);

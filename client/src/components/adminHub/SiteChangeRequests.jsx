@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
 import { useConfirm } from "../common/confirmContext";
-import { Field, Modal, PageTitle, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, Modal, PageTitle, SkeletonTable, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 
 const FIELDS = [["contactName", "Contact name"], ["contactPhone", "Contact phone"], ["contactEmail", "Contact email"], ["address", "Address"], ["city", "City"], ["district", "District"], ["state", "State"], ["electricalSupplyType", "Electrical supply"], ["latitude", "Latitude"], ["longitude", "Longitude"], ["geofenceRadiusM", "Geofence radius (m)"]];
 const STATUS = { PENDING: ["Waiting for Back-Admin", "bg-[#fff6e8] text-[#9a5200]"], APPROVED: ["Approved and applied", "bg-[#eaf8ed] text-[#287a37]"], REJECTED: ["Declined", "bg-[#fdecec] text-[#b42318]"] };
@@ -81,7 +81,7 @@ export default function SiteChangeRequests() {
       <Header />
       <PageTitle crumbs={[{ label: "Site Onboarding" }, { label: "Change Requests" }]} title="Site change requests" subtitle="Corrections to site master data raised by site users and auditors. Approve to apply, or decline with a reason." />
       <div className="mb-4 flex gap-2">{[["PENDING", "Waiting"], ["APPROVED", "Approved"], ["REJECTED", "Declined"]].map(([k, l]) => <button key={k} onClick={() => setStatus(k)} className={`rounded-full px-4 py-2 text-sm ${status === k ? "bg-[#181919] text-white" : "bg-white shadow-sm"}`}>{l}</button>)}</div>
-      {rows === null ? <p className="text-sm text-gray-500">Loading...</p> : rows.length === 0 ? <div className={`${cardClass} text-sm text-gray-500`}>No requests here.</div> : <ul className="space-y-3">{rows.map((r) => <RequestCard key={r.id} r={r} admin onDecided={load} />)}</ul>}
+      {rows === null ? <SkeletonTable rows={4} /> : rows.length === 0 ? <div className={`${cardClass} text-sm text-gray-500`}>No requests here.</div> : <ul className="space-y-3">{rows.map((r) => <RequestCard key={r.id} r={r} admin onDecided={load} />)}</ul>}
     </div>
   );
 }

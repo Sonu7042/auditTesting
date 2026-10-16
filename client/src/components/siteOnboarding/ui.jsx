@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 
 export const inputClass =
@@ -80,8 +81,13 @@ export function ProgressBar({ value }) {
 }
 
 export function Modal({ title, children, onClose, wide }) {
-  return (
-    <div className="anim-fade fixed inset-0 z-[200] flex items-center justify-center bg-[#141413]/45 p-4 backdrop-blur-[2px]">
+  const modalElement = (
+    <div
+      className="anim-fade fixed inset-0 z-[9999] flex h-screen w-screen items-center justify-center bg-[#141413]/45 p-4 backdrop-blur-[2px]"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && onClose) onClose();
+      }}
+    >
       <div className={`anim-rise modal-surface max-h-[90vh] w-full overflow-y-auto rounded-3xl bg-white m-auto p-6 shadow-[0_24px_60px_rgba(20,20,19,0.22)] ${wide ? "max-w-3xl" : "max-w-lg"}`}>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">{title}</h2>
@@ -91,5 +97,56 @@ export function Modal({ title, children, onClose, wide }) {
       </div>
     </div>
   );
+
+  return typeof document !== "undefined"
+    ? createPortal(modalElement, document.body)
+    : modalElement;
 }
 
+export function Skeleton({ className = "" }) {
+  return <div className={`skeleton rounded-xl ${className}`} />;
+}
+
+export function SkeletonCard() {
+  return (
+    <div className="rounded-3xl bg-white p-5 shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
+      <Skeleton className="h-14 w-14 rounded-2xl" />
+      <Skeleton className="mt-4 h-5 w-3/4" />
+      <Skeleton className="mt-2 h-4 w-1/2" />
+    </div>
+  );
+}
+
+export function SkeletonTable({ rows = 5 }) {
+  return (
+    <div className="rounded-3xl bg-white p-6 shadow-[0_2px_6px_rgba(0,0,0,0.08)] space-y-4">
+      <Skeleton className="h-6 w-1/4 mb-3" />
+      {[...Array(rows)].map((_, i) => (
+        <div key={i} className="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0">
+          <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-3 w-1/3" />
+          </div>
+          <Skeleton className="h-8 w-20 shrink-0 rounded-lg" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function SkeletonPage() {
+  return (
+    <div className="space-y-6">
+      <div className="rounded-3xl bg-white p-6 shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
+        <Skeleton className="h-4 w-32 mb-2" />
+        <Skeleton className="h-7 w-64" />
+      </div>
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}

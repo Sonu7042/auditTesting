@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, ProgressBar, StatusPill, cardClass } from "./ui";
+import { PageTitle, ProgressBar, SkeletonTable, StatusPill, cardClass } from "./ui";
 
 export default function ReviewQueue() {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function ReviewQueue() {
     <div>
       <Header />
       <PageTitle crumbs={[{ label: "Site Onboarding", to: "/admin-dashboard/site-onboarding" }, { label: "Review queue" }]} title="Review queue" subtitle="Sites submitted for Back-Admin review. Approving creates the live site." />
-      {loading ? <p className="text-sm text-gray-500">Loading...</p> : requests.length === 0 ? (
+      {loading ? <SkeletonTable rows={5} /> : requests.length === 0 ? (
         <div className={`${cardClass} text-center text-sm text-gray-500`}>Nothing is waiting for review.</div>
       ) : (
         <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08)]">

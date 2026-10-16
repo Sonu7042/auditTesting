@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
 import { useConfirm } from "../common/confirmContext";
-import { Field, Modal, PageTitle, ProgressBar, StatusPill, cardClass, darkBtn, inputClass, lightBtn } from "./ui";
+import { Field, Modal, PageTitle, ProgressBar, Skeleton, StatusPill, cardClass, darkBtn, inputClass, lightBtn } from "./ui";
 
 const FACILITIES = {
   SHOWROOM: { label: "Showroom", tiers: ["MADB", "CUBE", "SMART"] },
@@ -183,7 +183,32 @@ export default function SiteSetupWizard() {
   };
   const readiness = request?.readiness ?? 0;
   const facilityTypes = useMemo(() => data.facilities.items.map((i) => i.facilityType), [data.facilities.items]);
-  if (!request) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!request) {
+    return (
+      <div>
+        <Header />
+        <div className={`mb-6 ${cardClass}`}>
+          <Skeleton className="h-4 w-48 mb-2" />
+          <Skeleton className="h-8 w-72 mb-2" />
+          <Skeleton className="h-4 w-60" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className={`${cardClass} space-y-4`}>
+            <Skeleton className="h-6 w-1/3 mb-4" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className={`${cardClass} space-y-4`}>
+            <Skeleton className="h-6 w-1/3 mb-4" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const id = data.identity; const loc = data.location;
   const text = (group, field, label, extra = {}) => (

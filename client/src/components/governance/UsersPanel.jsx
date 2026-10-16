@@ -3,14 +3,14 @@ import axios from "axios";
 import { KeyRound, Plus } from "lucide-react";
 import { useConfirm } from "../common/confirmContext";
 import domain from "../../api/domain";
-import { cardClass, darkBtn } from "../siteOnboarding/ui";
+import { SkeletonTable, cardClass, darkBtn } from "../siteOnboarding/ui";
 import ExcelImport, { ImportButton } from "../common/ExcelImport";
 import AddUserModal, { CredentialsModal } from "./AddUserModal";
 import { ROLE_LABEL } from "./roles";
 
 // Users with access to a company or a site: list, add (generated username + one-time password), reset password, disable.
 export default function UsersPanel({ title, subtitle, url, lock, roles, emptyText = "No users yet." }) {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState(null);
   const [adding, setAdding] = useState(false);
   const [creds, setCreds] = useState(null);
   const [importing, setImporting] = useState(false);
@@ -39,7 +39,7 @@ export default function UsersPanel({ title, subtitle, url, lock, roles, emptyTex
         </div>
         <div className="flex flex-wrap gap-2"><ImportButton label="Import users" onClick={() => setImporting(true)} /><button className={darkBtn} onClick={() => setAdding(true)}><Plus size={16} /> Add user</button></div>
       </div>
-      {users.length === 0 ? <p className="text-sm text-gray-500">{emptyText}</p> : (
+      {users === null ? <SkeletonTable rows={4} /> : users.length === 0 ? <p className="text-sm text-gray-500">{emptyText}</p> : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-left text-xs uppercase text-gray-500"><tr><th className="min-w-[200px] py-2">Name</th><th className="min-w-[130px]">Role</th><th className="min-w-[110px]">Username</th><th>Status</th><th /></tr></thead>

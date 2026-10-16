@@ -8,7 +8,7 @@ import domain from "../../api/domain";
 import { useConfirm } from "../common/confirmContext";
 import UsersPanel from "../governance/UsersPanel";
 import { SiteLink } from "../auditFlow/SiteTrail";
-import { CompanyLogo, Modal, PageTitle, ProgressBar, StatusPill, cardClass, darkBtn, inputClass, lightBtn } from "./ui";
+import { CompanyLogo, Modal, PageTitle, ProgressBar, Skeleton, SkeletonCard, StatusPill, cardClass, darkBtn, inputClass, lightBtn } from "./ui";
 
 const FACILITY_LABELS = { SHOWROOM: "Showroom", WORKSHOP: "Workshop", STOCKYARD: "Stockyard" };
 
@@ -41,7 +41,23 @@ export default function CompanySites() {
   const shownSites = sites.filter((s) => match(s.locationName, s.locationCode, s.dealerName, s.zone, s.regionalOffice, s.sapCode));
   const shownRequests = requests.filter((r) => match(r.locationName, r.locationCode, r.dealerName, r.zone));
 
-  if (!company) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!company) {
+    return (
+      <div>
+        <Header />
+        <div className={`mb-6 ${cardClass}`}>
+          <Skeleton className="h-4 w-40 mb-2" />
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

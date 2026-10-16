@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { useConfirm } from "../common/confirmContext";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, cardClass, darkBtn } from "../siteOnboarding/ui";
+import { PageTitle, SkeletonTable, cardClass, darkBtn } from "../siteOnboarding/ui";
 import { SiteLink } from "./SiteTrail";
 import { FACILITY_LABELS, fmtDateTime } from "./helpers";
 
@@ -24,7 +24,7 @@ export default function NoticesLog() {
       <Header />
       <PageTitle crumbs={[{ label: "Scheduling & Notification", to: "/admin-dashboard/stage/4" }, { label: "Notices" }]} title="Notifications & escalations" subtitle="The communication audit trail for every scheduled audit. Reminders are sent automatically when due; missed ones are flagged for follow-up."
         actions={<button className={darkBtn} onClick={runNow}>Send due notices now</button>} />
-      {notices === null ? <p className="text-sm text-gray-500">Loading...</p> : notices.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No notices yet. They are created when an audit is scheduled.</div> : (
+      {notices === null ? <SkeletonTable rows={5} /> : notices.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No notices yet. They are created when an audit is scheduled.</div> : (
         <div className="overflow-x-auto rounded-3xl bg-white shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
           <table className="w-full text-sm">
             <thead className="bg-[#f3f5f7] text-left text-xs uppercase text-gray-500"><tr><th className="p-3">Audit</th><th>Notice</th><th>Due</th><th>Sent</th><th>To</th><th>Status</th></tr></thead>

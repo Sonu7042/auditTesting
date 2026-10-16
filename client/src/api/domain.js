@@ -8,7 +8,7 @@ const domain =
 import.meta.env.VITE_API_URL ||
 (import.meta.env.DEV
   ? `http://${devApiHost}:5000/api`
-  : "https://audit-portal-with-app-e11i.vercel.app/api");
+  : "https://audit-testing-bdzn.vercel.app/api");    
 
 const getApiErrorMessage = (error, fallback = "Something went wrong") => {
   const data = error?.response?.data;
@@ -26,8 +26,6 @@ const getApiErrorMessage = (error, fallback = "Something went wrong") => {
   if (error?.message) return error.message;
   return fallback;
 };  
-
-
 
 const successMethods = new Set(["post", "put", "patch", "delete"]);
 

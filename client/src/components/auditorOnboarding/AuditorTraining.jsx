@@ -4,7 +4,7 @@ import { useConfirm } from "../common/confirmContext";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
 import toast from "react-hot-toast";
-import { Field, PageTitle, ProgressBar, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, PageTitle, ProgressBar, SkeletonPage, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 import { STATUS_META } from "./meta";
 import { Pill } from "./shared";
 import AuditorIdCard, { PhotoUpload } from "./AuditorIdCard";
@@ -30,7 +30,7 @@ export default function AuditorTraining() {
   useEffect(() => { load(); }, []);
 
   if (error) return <div><Header /><PageTitle title="Training" subtitle={error} /></div>;
-  if (!data) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!data) return <div><Header /><SkeletonPage /></div>;
   const { onboarding: o, content } = data;
   const active = ["TRAINING", "RETRAINING"].includes(o.status);
 

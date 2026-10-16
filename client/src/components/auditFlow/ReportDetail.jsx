@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { useConfirm } from "../common/confirmContext";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { Field, Modal, PageTitle, ProgressBar, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, Modal, PageTitle, ProgressBar, SkeletonPage, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 import ReportMenu from "../common/ReportMenu";
 import DocumentViewer from "../common/DocumentViewer";
 import SignaturePad from "./SignaturePad";
@@ -66,7 +66,7 @@ export default function ReportDetail({ base }) {
   };
   const reviewNow = (action) => act(() => axios.patch(`${domain}/client-audit-reports/${reportId}/review`, { action, remarks }, { showSuccessToast: false }), `Report ${action.toLowerCase()} done`).then(() => setRemarks(""));
 
-  if (!d) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!d) return <div><Header /><SkeletonPage /></div>;
   const { report: r, scoring, anomalies, register } = d;
   const open = register.filter((n) => !["CLOSED", "VOID"].includes(n.status));
   const canSign = ["ADMIN", "AUDITOR", "SITE_USER", "SITE_INCHARGE"].includes(role) && r.status === "PUBLISHED";

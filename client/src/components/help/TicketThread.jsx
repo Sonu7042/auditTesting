@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import domain from "../../api/domain";
-import { darkBtn, inputClass } from "../siteOnboarding/ui";
+import { SkeletonTable, darkBtn, inputClass } from "../siteOnboarding/ui";
 
 import { STATUS_LABEL, STATUS_STYLE } from "./ticketMeta";
 const when = (v) => new Date(v).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false });
@@ -16,7 +16,7 @@ export default function TicketThread({ ticketId, admin = false, onChanged }) {
   const load = useCallback(() => axios.get(`${domain}/help/tickets/${ticketId}`).then(({ data: d }) => setData(d)), [ticketId]);
   useEffect(() => { load(); }, [load]);
 
-  if (!data) return <p className="text-sm text-gray-500">Loading...</p>;
+  if (!data) return <SkeletonTable rows={3} />;
   const t = data.ticket;
   const send = async () => {
     setBusy(true);

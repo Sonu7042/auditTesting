@@ -3,7 +3,7 @@ import axios from "axios";
 import { Medal, Trophy } from "lucide-react";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, cardClass } from "../siteOnboarding/ui";
+import { PageTitle, SkeletonTable, cardClass } from "../siteOnboarding/ui";
 
 const LEVELS = [["site", "Sites"], ["ro", "Regional offices"], ["zone", "Zones"]];
 const METRICS = [["overall", "Overall index"], ["safety", "Safety performance"]];
@@ -23,7 +23,7 @@ export default function Rankings() {
         <div className="flex gap-2">{LEVELS.map(([k, t]) => <button key={k} onClick={() => setLevel(k)} className={`rounded-full px-4 py-2 text-sm ${level === k ? "bg-[#181919] text-white" : "bg-white shadow-sm"}`}>{t}</button>)}</div>
         <div className="flex gap-2">{METRICS.map(([k, t]) => <button key={k} onClick={() => setMetric(k)} className={`rounded-full px-4 py-2 text-sm ${metric === k ? "bg-[#287a37] text-white" : "bg-white shadow-sm"}`}>{t}</button>)}</div>
       </div>
-      {!data ? <p className="text-sm text-gray-500">Loading...</p> : data.rows.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No audited {LEVELS.find((l) => l[0] === level)[1].toLowerCase()} yet.</div> : (
+      {!data ? <SkeletonTable rows={5} /> : data.rows.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No audited {LEVELS.find((l) => l[0] === level)[1].toLowerCase()} yet.</div> : (
         <>
           <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
             {data.rows.slice(0, 3).map((r, i) => (

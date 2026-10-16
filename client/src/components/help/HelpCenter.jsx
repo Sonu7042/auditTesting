@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import domain from "../../api/domain";
 import Header from "../adminDashboard/Header";
-import { Field, Modal, PageTitle, ProgressBar, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, Modal, PageTitle, ProgressBar, SkeletonTable, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 import GuideTour from "./GuideTour";
 import Markdown from "./Markdown";
 import TicketThread from "./TicketThread";
@@ -20,7 +20,7 @@ function Start({ base }) {
   const [guide, setGuide] = useState(null);
   const [tour, setTour] = useState(false);
   useEffect(() => { axios.get(`${domain}/help/guide`).then(({ data }) => setGuide(data)); }, []);
-  if (!guide) return <p className="text-sm text-gray-500">Loading...</p>;
+  if (!guide) return <SkeletonTable rows={4} />;
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -47,7 +47,7 @@ function Training() {
   const [open, setOpen] = useState(null);
   const load = useCallback(() => axios.get(`${domain}/help/training`).then(({ data: d }) => setData(d)), []);
   useEffect(() => { load(); }, [load]);
-  if (!data) return <p className="text-sm text-gray-500">Loading...</p>;
+  if (!data) return <SkeletonTable rows={4} />;
   const complete = async (m) => { await axios.post(`${domain}/help/training/${m.id}/complete`); toast.success("Marked as done"); setOpen(null); load(); };
   return (
     <div>
@@ -82,7 +82,7 @@ function Policies() {
   const [open, setOpen] = useState(null);
   const load = useCallback(() => axios.get(`${domain}/help/policies`).then(({ data }) => setList(data.policies)), []);
   useEffect(() => { load(); }, [load]);
-  if (!list) return <p className="text-sm text-gray-500">Loading...</p>;
+  if (!list) return <SkeletonTable rows={4} />;
   const accept = async (p) => { await axios.post(`${domain}/help/policies/acknowledge`, { ids: [p.id] }); toast.success("Accepted"); setOpen(null); load(); };
   return (
     <div className="space-y-3">
@@ -120,7 +120,7 @@ function Support() {
         <p className="max-w-2xl text-sm text-gray-600">Ask a question or report a problem, such as a report that looks wrong, a login that does not work, or a missing photograph. Back-Admin replies here.</p>
         <button type="button" className={darkBtn} onClick={() => setForm({ category: "REPORT", priority: "NORMAL", subject: "", description: "" })}><Plus size={16} /> New request</button>
       </div>
-      {tickets === null ? <p className="text-sm text-gray-500">Loading...</p> : tickets.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No requests yet.</div> : (
+      {tickets === null ? <SkeletonTable rows={4} /> : tickets.length === 0 ? <div className={`${cardClass} text-center text-sm text-gray-500`}>No requests yet.</div> : (
         <div className="space-y-2.5">
           {tickets.map((t) => (
             <button key={t.id} type="button" onClick={() => setView(t.id)} className={`${cardClass} flex w-full flex-wrap items-center justify-between gap-3 !p-4 text-left transition hover:-translate-y-0.5`}>

@@ -7,6 +7,7 @@ import bell from "../../assets/header/Bell_icon.svg";
 import helpSupport from "../../assets/header/help_icon.svg";
 import InitialAvatar from "../InitialAvatar";
 import ThemeSwitcher from "../common/ThemeSwitcher";
+import { Skeleton } from "../siteOnboarding/ui";
 
 const formatRole = (role) => (role ? role.toLowerCase().split("_").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "User");
 
@@ -133,8 +134,18 @@ export default function Header() {
               <div className="max-h-[430px] overflow-y-auto p-3">
                 {error ? (
                   <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
+                ) : loading && notifications.length === 0 ? (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="rounded-xl border border-[#e1e1e1] bg-white p-4 space-y-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-full" />
+                        <Skeleton className="h-2.5 w-1/4" />
+                      </div>
+                    ))}
+                  </div>
                 ) : notifications.length === 0 ? (
-                  <div className="rounded-lg bg-white px-4 py-8 text-center text-sm text-[#666]">{loading ? "Loading notifications..." : "No new notifications."}</div>
+                  <div className="rounded-lg bg-white px-4 py-8 text-center text-sm text-[#666]">No new notifications.</div>
                 ) : (
                   <div className="space-y-3">
                     {notifications.map((n) => (

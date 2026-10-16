@@ -3,7 +3,7 @@ import axios from "axios";
 import { Camera } from "lucide-react";
 import { useConfirm } from "../common/confirmContext";
 import domain from "../../api/domain";
-import { Field, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
+import { Field, Skeleton, cardClass, darkBtn, inputClass, lightBtn } from "../siteOnboarding/ui";
 import { SEVERITY_STYLES, fmtDate } from "./helpers";
 
 const DEALER = ["SITE_USER", "SITE_INCHARGE", "REGIONAL_MANAGER", "ZONAL_MANAGER", "CORPORATE_MANAGER"];
@@ -54,7 +54,7 @@ export default function ReportCapa({ register, reportStatus, onChanged }) {
             </button>
             {openId === n.id && (
               <div className="mb-3 rounded-2xl bg-[#f7f8fa] p-4 text-sm">
-                {!detail ? <p className="text-gray-500">Loading...</p> : (<>
+                {!detail ? <div className="space-y-2 py-2"><Skeleton className="h-4 w-48" /><Skeleton className="h-16 w-full" /></div> : (<>
                   {detail.recommendation && <p className="mb-2"><b>Auditor's recommendation:</b> {detail.recommendation}</p>}
                   {detail.rootCause && <dl className="mb-3 grid gap-2 md:grid-cols-2">{[["Root cause", detail.rootCause], ["Corrective action", detail.correctiveAction], ["Preventive action", detail.preventiveAction], ["Responsible", `${detail.responsiblePerson} · by ${fmtDate(detail.targetDate)}`]].map(([k, v]) => <div key={k}><dt className="text-xs text-gray-500">{k}</dt><dd>{v}</dd></div>)}</dl>}
                   {detail.auditorRemarks && <p className="mb-3 rounded-xl bg-white p-3 text-xs"><b>Auditor / Back-Admin:</b> {detail.auditorRemarks}</p>}

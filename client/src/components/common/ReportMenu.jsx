@@ -3,6 +3,7 @@ import axios from "axios";
 import { FileText, Layers } from "lucide-react";
 import toast from "react-hot-toast";
 import domain from "../../api/domain";
+import { Skeleton } from "../siteOnboarding/ui";
 
 const ALL_TYPES = [
   { key: "ELECTRICAL", label: "Electrical Safety Audit" },
@@ -85,7 +86,7 @@ export default function ReportMenu({ reportId, label, compact = false, align = "
       {open && (
         <div style={{ position: "fixed", top: pos.top, left: pos.left, width: pos.width }} className="anim-pop z-50 rounded-2xl border border-[#d8dee8] bg-white p-3 text-left text-sm shadow-[0_8px_30px_rgba(0,0,0,0.15)]">
           <div className="px-1 pb-2 text-xs text-gray-500">{template ? "Blank template: every detail is a placeholder to complete in Word." : (format === "pdf" ? "View one audit type, or tick several for a combined report." : "Download one audit type, or tick several for a combined report.")}</div>
-          {types === null ? <p className="px-1 py-2 text-xs text-gray-500">Loading...</p> : types.length === 0 ? <p className="px-1 py-2 text-xs text-gray-500">No audit types found for this report.</p> : (
+          {types === null ? <div className="space-y-1.5 px-1 py-2"><Skeleton className="h-4 w-3/4" /><Skeleton className="h-4 w-1/2" /></div> : types.length === 0 ? <p className="px-1 py-2 text-xs text-gray-500">No audit types found for this report.</p> : (
             <>
               <ul className="space-y-1">
                 {types.map((t) => (

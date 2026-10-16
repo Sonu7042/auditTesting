@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { useConfirm } from "../common/confirmContext";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
-import { PageTitle, ProgressBar, cardClass, darkBtn, lightBtn } from "../siteOnboarding/ui";
+import { PageTitle, ProgressBar, Skeleton, SkeletonCard, cardClass, darkBtn, lightBtn } from "../siteOnboarding/ui";
 import { ScoreRing } from "../auditorOnboarding/shared";
 import DocumentViewer from "../common/DocumentViewer";
 import ReportMenu from "../common/ReportMenu";
@@ -101,7 +101,23 @@ export default function SiteDetail() {
   const history = [...counted].sort((a, b) => new Date(a.generatedAt) - new Date(b.generatedAt)).map((r) => ({ label: fmtDate(r.generatedAt), percent: r.percent }));
 
   if (error) return <div><Header /><PageTitle title="Site" subtitle={error} /></div>;
-  if (!d) return <div><Header /><p className="text-sm text-gray-500">Loading...</p></div>;
+  if (!d) {
+    return (
+      <div>
+        <Header />
+        <div className={`mb-6 ${cardClass}`}>
+          <Skeleton className="h-4 w-48 mb-2" />
+          <Skeleton className="h-8 w-72 mb-2" />
+          <Skeleton className="h-4 w-60" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </div>
+    );
+  }
   const shape = siteShape({ ...site, companyId: site.programme.companyId, company: site.programme.company.companyName });
   const upload = admin && (
     <div className="mb-4 flex flex-wrap items-center gap-3">
