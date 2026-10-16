@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 // Device with USB (adb reverse): 'http://localhost:5000/api'
 const developmentUrl =
   Platform.OS === 'android'
-    ? 'http://10.0.2.2:5000/api'
+    ? 'http://192.168.1.15:5000/api'
     : 'http://localhost:5000/api';
 
 export const env = Object.freeze({
