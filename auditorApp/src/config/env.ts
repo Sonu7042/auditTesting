@@ -5,16 +5,13 @@ import { Platform } from 'react-native';
 // Device with USB (adb reverse): 'http://localhost:5000/api'
 const developmentUrl =
   Platform.OS === 'android'
-    ? 'http://192.168.1.15:5000/api'
+    ? 'http://192.168.1.2:5000/api'
     : 'http://localhost:5000/api';
 
 export const env = Object.freeze({
   apiUrl: __DEV__ ? developmentUrl 
     : 'https://audit-testing-bdzn.vercel.app/api',  
 });
-
-
-
 
 // import { Platform } from 'react-native';
 // const developmentUrl =
