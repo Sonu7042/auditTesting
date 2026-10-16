@@ -5,7 +5,7 @@ const developmentUrl =
     : 'http://localhost:5000/api';
 export const env = Object.freeze({
   apiUrl: __DEV__ ? developmentUrl 
-    : 'https://audit-portal-with-app-e11i.vercel.app/api',  
+    : 'https://audit-testing-bdzn.vercel.app/api',  
 });
 
 
