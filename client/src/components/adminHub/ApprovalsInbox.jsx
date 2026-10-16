@@ -18,7 +18,7 @@ export default function ApprovalsInbox() {
       <Header />
       <PageTitle crumbs={[{ label: "Auditor Onboarding" }, { label: "Reviews & Approvals" }]} title="Reviews & approvals" subtitle={data.total ? `${data.total} item(s) are waiting for a decision. The oldest are listed first.` : "Nothing is waiting for you."} />
       {data.total === 0 && <div className={`${cardClass} flex items-center gap-3 text-sm text-gray-600`}><CheckCircle2 className="text-[#287a37]" /> Everything is up to date.</div>}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 mt-5">
         {data.sections.map((s) => (
           <section key={s.key} className={cardClass}>
             <div className="mb-3 flex items-center justify-between">

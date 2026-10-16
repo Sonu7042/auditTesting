@@ -15,7 +15,7 @@ async function main() {
     console.log("Admin already exists"); 
     return; 
   }
-
+9
   await prisma.user.create({
     data: {
       fullName: "Admin",

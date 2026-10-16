@@ -17,8 +17,8 @@ import {PhotoPicker, PickedPhoto} from './PhotoPicker';
 import {useAppTheme} from '../../store/ThemeContext';
 
 export function PreviousNcReviewList({
-  reviews,
-  auditId,
+  reviews,          
+  auditId,   
   onClosed,
 }: {
   reviews: PreviousNC[];

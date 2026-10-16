@@ -23,7 +23,7 @@ const reportSelect = {
   },
 };
 
-const analyse = (report) => {
+const analyse = (report) => { 
   const scoring = scoreJob(report.job, report.job.sessions);
   const anomalies = detectAnomalies(report.job, report.job.sessions, scoring);
   return { scoring, anomalies };
