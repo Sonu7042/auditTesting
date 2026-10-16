@@ -520,3 +520,10 @@ html[data-theme="dark"] ::placeholder { color: var(--app-text-soft); }
 html[data-theme="dark"] [role="alertdialog"], html[data-theme="dark"] [role="dialog"] { color: var(--app-text); }
 html[data-theme="dark"] .bg-black\/45 { background-color: rgba(0,0,0,.65) !important; }
 html[data-theme="dark"] .shadow-2xl { box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+
+/* Ensure toast/notification is always on top of all modals, sheets, and confirmation dialogs */
+[data-rht-toaster],
+div:has(> [data-rht-toaster]),
+div[id^="react-hot-toast"] {
+  z-index: 999999 !important;
+}
