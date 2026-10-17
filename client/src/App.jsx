@@ -227,7 +227,7 @@ const App = () => {
           <Route path="change-password" element={<ChangePassword />} />
           <Route path="help" element={<HelpCenter />} />
           <Route path="help-support" element={<HelpCenter />} />
-          <Route path="site-onboarding" element={<ProtectedRoute allowedRoles={["ADMIN"]}><SiteOnboarding /></ProtectedRoute>} />
+          <Route path="site-onboarding" element={<ProtectedRoute allowedRoles={["ADMIN"]}><SiteOnbdevoarding /></ProtectedRoute>} />
           <Route path="site-onboarding/review" element={<ProtectedRoute allowedRoles={["ADMIN"]}><ReviewQueue /></ProtectedRoute>} />
           <Route path="site-onboarding/request/:requestId" element={<ProtectedRoute allowedRoles={["ADMIN"]}><SiteSetupWizard /></ProtectedRoute>} />
           <Route path="site-onboarding/:companyId" element={<ProtectedRoute allowedRoles={["ADMIN"]}><CompanySites /></ProtectedRoute>} />
