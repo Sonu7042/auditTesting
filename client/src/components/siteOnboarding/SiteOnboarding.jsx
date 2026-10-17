@@ -16,6 +16,7 @@ export default function SiteOnboarding() {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(emptyCompany);
+  const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [showImport, setShowImport] = useState(false);
 
@@ -28,6 +29,12 @@ export default function SiteOnboarding() {
     }
   };
   useEffect(() => { load(); }, []);
+
+  const closeAdd = () => {
+    setShowAdd(false);
+    setForm(emptyCompany);
+    setErrors({});
+  };
 
   const onLogo = (event) => {
     const file = event.target.files?.[0];
@@ -42,16 +49,29 @@ export default function SiteOnboarding() {
   };
 
   const save = async () => {
-    if (!form.companyName.trim()) return toast.error("Company name is required.");
+    if (!form.companyName?.trim()) {
+      setErrors({ companyName: "Company name is required." });
+      return;
+    }
+    setErrors({});
     setSaving(true);
     try {
       await axios.post(`${domain}/company/create-company`, form, { showSuccessToast: true });
-      setShowAdd(false);
-      setForm(emptyCompany);
+      closeAdd();
       await load();
+    } catch (error) {
+      const msg = error.response?.data?.message || "Failed to create company";
+      setErrors({ companyName: msg });
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
+  };
+
+  const openAdd = () => {
+    setForm(emptyCompany);
+    setErrors({});
+    setShowAdd(true);
   };
 
   return (
@@ -61,7 +81,7 @@ export default function SiteOnboarding() {
         crumbs={[{ label: "Site Onboarding" }]}
         title="Companies"
         subtitle="Select a company to see its sites, add sites, or import them from Excel."
-        actions={<><ImportButton label="Import companies" onClick={() => setShowImport(true)} /><button className={darkBtn} onClick={() => setShowAdd(true)}><Plus size={16} /> Add Company</button></>}
+        actions={<><ImportButton label="Import companies" onClick={() => setShowImport(true)} /><button className={darkBtn} onClick={openAdd}><Plus size={16} /> Add Company</button></>}
       />
 
       {loading ? (
@@ -96,7 +116,7 @@ export default function SiteOnboarding() {
           ))}
           <button
             type="button"
-            onClick={() => setShowAdd(true)}
+            onClick={openAdd}
             className="flex min-h-[200px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-[#CECECE] text-sm text-gray-500 hover:border-[#63C174] hover:text-[#287a37]"
           >
             <Plus size={28} /> Add company
@@ -105,7 +125,7 @@ export default function SiteOnboarding() {
       )}
 
       {showAdd && (
-        <Modal  title="Add company" onClose={() => setShowAdd(false)}>
+        <Modal title="Add company" onClose={closeAdd}>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <CompanyLogo company={{ companyName: form.companyName || "?", logoUrl: form.logoUrl }} />
@@ -114,7 +134,17 @@ export default function SiteOnboarding() {
                 <input type="file" accept="image/*" className="hidden" onChange={onLogo} />
               </label>
             </div>
-            <Field label="Company name *"><input className={inputClass} value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} placeholder="M&M - NORTH" /></Field>
+            <Field label="Company name *" error={errors.companyName}>
+              <input
+                className={`${inputClass} ${errors.companyName ? "!border-red-500 focus:!border-red-500 focus:!ring-red-500/20" : ""}`}
+                value={form.companyName}
+                onChange={(e) => {
+                  setForm({ ...form, companyName: e.target.value });
+                  if (errors.companyName) setErrors((prev) => ({ ...prev, companyName: "" }));
+                }}
+                placeholder="M&M - NORTH"
+              />
+            </Field>
             <Field label="Email"><input className={inputClass} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
             <Field label="Address"><textarea rows="2" className={inputClass} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></Field>
             <div className="grid grid-cols-2 gap-4">
@@ -122,7 +152,7 @@ export default function SiteOnboarding() {
               <Field label="Contact phone"><input className={inputClass} value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} /></Field>
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <button className={lightBtn} onClick={() => setShowAdd(false)}>Cancel</button>
+              <button className={lightBtn} onClick={closeAdd}>Cancel</button>
               <button className={darkBtn} disabled={saving} onClick={save}>{saving ? "Saving..." : "Save company"}</button>
             </div>
           </div>

@@ -2,13 +2,17 @@ const prisma = require("../../config/prisma")
 
 exports.createCompany = async (req, res) => {
   try {
-
     const { companyName, email, address, po_no, logoUrl, contactName, contactPhone } = req.body;
-    
+
+    if (!companyName || !companyName.trim()) {
+      return res.status(400).json({
+        message: "Company name is required"
+      });
+    }
 
     const company = await prisma.company.create({
       data: {
-        companyName,
+        companyName: companyName.trim(),
         email,
         address,
         po_no,
@@ -36,15 +40,15 @@ exports.getCompanies = async (req, res) => {
   try {
     const companies = await prisma.company.findMany({
       include: {
-        users:{
-          select:{
+        users: {
+          select: {
             id: true,
-            fullName: true,  
+            fullName: true,
             email: true,
             username: true,
             role: true,
             status: true,
-            createdAt:true,
+            createdAt: true,
             password: true
           }
         }
@@ -69,8 +73,8 @@ exports.getCompany = async (req, res) => {
   try {
 
     const { id } = req.params;
-    
-   if (!id) {
+
+    if (!id) {
       return res.status(404).json({
         message: "companyId not found"
       });
@@ -106,10 +110,16 @@ exports.updateCompany = async (req, res) => {
     const { id } = req.params;
     const { companyName, email, address, po_no, logoUrl, contactName, contactPhone } = req.body;
 
+    if (companyName !== undefined && (!companyName || !companyName.trim())) {
+      return res.status(400).json({
+        message: "Company name is required"
+      });
+    }
+
     const company = await prisma.company.update({
       where: { id },
       data: {
-        companyName,
+        companyName: companyName ? companyName.trim() : undefined,
         email,
         address,
         po_no,
@@ -123,9 +133,7 @@ exports.updateCompany = async (req, res) => {
       company
     });
 
-
   } catch (error) {
-
     res.status(500).json({
       message: error.message
     });

@@ -29,7 +29,8 @@ export default function SetPin() {
   };
 
 
-  const handleSetPin = () => {
+  const handleSetPin = (e) => {
+    if (e) e.preventDefault();
     setError("");
 
     if (pin.length !== 4) {
@@ -56,10 +57,7 @@ export default function SetPin() {
     localStorage.setItem("devicePin", pin);
     sessionStorage.setItem("devicePin", pin);
     goToDashboard();
-
-
-
-};
+  };
 
 
 
@@ -109,56 +107,58 @@ const handleLogout = () => {
           {isUnlockMode ? "Enter your device security PIN." : "Set your device security PIN."}
         </p>
 
-        {/* Set Pin */}
-        <input
-          type="password"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          placeholder={isUnlockMode ? "Enter Pin" : "Set Pin"}
-          maxLength={4}
-          value={pin}
-          onChange={handlePinChange(setPin)}
-          className="w-full mb-4 px-5 py-3 rounded-xl bg-gray-100 focus:outline-none shadow-[0_4px_6px_rgba(0,0,0,0.1)]
-          border border-[#cecece]"
-        />
+        <form onSubmit={handleSetPin}>
+          {/* Set Pin */}
+          <input
+            type="password"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder={isUnlockMode ? "Enter Pin" : "Set Pin"}
+            maxLength={4}
+            value={pin}
+            onChange={handlePinChange(setPin)}
+            className="w-full mb-4 px-5 py-3 rounded-xl bg-gray-100 focus:outline-none shadow-[0_4px_6px_rgba(0,0,0,0.1)]
+            border border-[#cecece]"
+          />
 
-        <p className="text-xs text-gray-600 mb-6">
-          {isUnlockMode
-            ? "Use the 4-digit PIN you set after login."
-            : "Set a 4-digit PIN to protect audit data during site visits."}
-        </p>
+          <p className="text-xs text-gray-600 mb-6">
+            {isUnlockMode
+              ? "Use the 4-digit PIN you set after login."
+              : "Set a 4-digit PIN to protect audit data during site visits."}
+          </p>
 
-        {/* Re-enter Pin */}
-        {!isUnlockMode && (
-          <>
-            <input
-              type="password"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="Re-Enter Pin"
-              maxLength={4}
-              value={confirmPin}
-              onChange={handlePinChange(setConfirmPin)}
-              className="w-full mb-4 px-5 py-3 rounded-xl bg-gray-100 focus:outline-none shadow-[0_4px_6px_rgba(0,0,0,0.1)]
-          border border-[#cecece]"
-            />
+          {/* Re-enter Pin */}
+          {!isUnlockMode && (
+            <>
+              <input
+                type="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="Re-Enter Pin"
+                maxLength={4}
+                value={confirmPin}
+                onChange={handlePinChange(setConfirmPin)}
+                className="w-full mb-4 px-5 py-3 rounded-xl bg-gray-100 focus:outline-none shadow-[0_4px_6px_rgba(0,0,0,0.1)]
+            border border-[#cecece]"
+              />
 
-            <p className="text-xs text-gray-600 mb-6">
-              Confirm your PIN to complete secure setup.
-            </p>
-          </>
-        )}
+              <p className="text-xs text-gray-600 mb-6">
+                Confirm your PIN to complete secure setup.
+              </p>
+            </>
+          )}
 
-         {error && (
-          <p className="text-red-500 text-sm mb-3">{error}</p>
-        )}
+          {error && (
+            <p className="text-red-500 text-sm mb-3">{error}</p>
+          )}
 
-        {/* Button */}
-        <button
-         onClick={handleSetPin}
-         className="w-full bg-[#1E1E1E] cursor-pointer text-white py-3 rounded-xl hover:bg-gray-800 transition">
-          {isUnlockMode ? "Unlock" : "Log In"}
-        </button>
+          {/* Button */}
+          <button
+            type="submit"
+            className="w-full bg-[#1E1E1E] cursor-pointer text-white py-3 rounded-xl hover:bg-gray-800 transition">
+            {isUnlockMode ? "Unlock" : "Log In"}
+          </button>
+        </form>
 
         {/* Bottom Text */}
         <p className="text-center text-xs text-gray-600 mt-4">
