@@ -7,6 +7,7 @@ import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
 import ExcelImport, { ImportButton } from "../common/ExcelImport";
 import { CompanyLogo, Field, Modal, PageTitle, SkeletonCard, cardClass, darkBtn, inputClass, lightBtn } from "./ui";
+import { useRef } from "react";
 
 const emptyCompany = { companyName: "", email: "", address: "", contactName: "", contactPhone: "", logoUrl: "" };
 
@@ -18,6 +19,9 @@ export default function SiteOnboarding() {
   const [form, setForm] = useState(emptyCompany);
   const [saving, setSaving] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const companyNameRef = useRef(null);
+  const emailRef = useRef(null);
+  const contactPhoneRef = useRef(null);
 
   const load = async () => {
     try {
@@ -105,28 +109,92 @@ export default function SiteOnboarding() {
       )}
 
       {showAdd && (
-        <Modal  title="Add company" onClose={() => setShowAdd(false)}>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <CompanyLogo company={{ companyName: form.companyName || "?", logoUrl: form.logoUrl }} />
-              <label className={`${lightBtn} cursor-pointer`}>
-                Upload logo
-                <input type="file" accept="image/*" className="hidden" onChange={onLogo} />
-              </label>
-            </div>
-            <Field label="Company name *"><input className={inputClass} value={form.companyName} onChange={(e) => setForm({ ...form, companyName: e.target.value })} placeholder="M&M - NORTH" /></Field>
-            <Field label="Email"><input className={inputClass} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
-            <Field label="Address"><textarea rows="2" className={inputClass} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></Field>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Contact name"><input className={inputClass} value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} /></Field>
-              <Field label="Contact phone"><input className={inputClass} value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} /></Field>
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <button className={lightBtn} onClick={() => setShowAdd(false)}>Cancel</button>
-              <button className={darkBtn} disabled={saving} onClick={save}>{saving ? "Saving..." : "Save company"}</button>
-            </div>
-          </div>
-        </Modal>
+        
+<Modal title="Add company" onClose={() => setShowAdd(false)}>
+  <div className="space-y-4">
+    <div className="flex items-center gap-4">
+      <CompanyLogo company={{ companyName: form.companyName || "?", logoUrl: form.logoUrl }} />
+      <label className={`${lightBtn} cursor-pointer`}>
+        Upload logo
+        <input type="file" accept="image/*" className="hidden" onChange={onLogo} />
+      </label>
+    </div>
+
+    <Field label="Company name *">
+      <input
+        ref={companyNameRef}
+        className={`${inputClass} focus:[clip-path:border-box] border-2 focus:!border-red-500 ${!form.companyName.trim() && companyNameRef.current?.dataset.invalid === "true" ? "border-red-500" : ""}`}
+        value={form.companyName}
+        onChange={(e) => {
+          setForm({ ...form, companyName: e.target.value });
+          if (e.target.value.trim()) companyNameRef.current.dataset.invalid = "false";
+        }}
+        placeholder="M&M - NORTH"
+      />
+    </Field>
+
+    <Field label="Email *">
+      <input
+        ref={emailRef}
+        className={`${inputClass} focus:[clip-path:border-box] border-2 focus:!border-red-500 ${emailRef.current?.dataset.invalid === "true" ? "border-red-500" : ""}`}
+        value={form.email}
+        onChange={(e) => {
+          setForm({ ...form, email: e.target.value });
+          if (e.target.value.trim()) emailRef.current.dataset.invalid = "false";
+        }}
+      />
+    </Field>
+
+    <Field label="Address">
+      <textarea rows="2" className={`${inputClass} focus:[clip-path:border-box] border-2 focus:!border-red-500`} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+    </Field>
+
+    <div className="grid grid-cols-2 gap-4">
+      <Field label="Contact name">
+        <input className={`${inputClass} focus:[clip-path:border-box] border-2 focus:!border-red-500`} value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} />
+      </Field>
+
+      <Field label="Contact phone *">
+        <input
+          ref={contactPhoneRef}
+          className={`${inputClass} focus:[clip-path:border-box] border-2 focus:!border-red-500 ${contactPhoneRef.current?.dataset.invalid === "true" ? "border-red-500" : ""}`}
+          value={form.contactPhone}
+          maxLength={10}
+          onChange={(e) => {
+            const phone = e.target.value.replace(/[^0-9]/g, "").slice(0, 10);
+            setForm({ ...form, contactPhone: phone });
+            if (phone.length === 10) contactPhoneRef.current.dataset.invalid = "false";
+          }}
+        />
+      </Field>
+    </div>
+
+    <div className="flex justify-end gap-2 pt-2">
+      <button className={lightBtn} onClick={() => setShowAdd(false)}>Cancel</button>
+      <button
+        className={darkBtn}
+        disabled={saving}
+        onClick={() => {
+          const companyEmpty = !form.companyName.trim();
+          const emailEmpty = !form.email.trim();
+          const phoneInvalid = !/^[0-9]{10}$/.test(form.contactPhone);
+
+          companyNameRef.current.dataset.invalid = String(companyEmpty);
+          emailRef.current.dataset.invalid = String(emailEmpty);
+          contactPhoneRef.current.dataset.invalid = String(phoneInvalid);
+
+          if (companyEmpty) companyNameRef.current.focus();
+          else if (emailEmpty) emailRef.current.focus();
+          else if (phoneInvalid) contactPhoneRef.current.focus();
+          else save();
+        }}
+      >
+        {saving ? "Saving..." : "Save company"}
+      </button>
+    </div>
+  </div>
+</Modal>
+
       )}
       {showImport && <ExcelImport kind="companies" title="Import companies from Excel" intro="One row per company (name, contact, address, PO number). Companies that already exist are skipped, or updated if you tick the option. Add each company's sites afterwards from its own page." allowUpdate onClose={() => setShowImport(false)} onDone={load} />}
     </div>

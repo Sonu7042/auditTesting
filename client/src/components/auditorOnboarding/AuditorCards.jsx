@@ -115,9 +115,9 @@ export default function AuditorCards() {
             <Field label="Full name *"><input className={inputClass} value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} /></Field>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Email *"><input className={inputClass} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
-              <Field label="Phone"><input className={inputClass} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
+              <Field label="Phone"><input className={inputClass} value={form.phone}  maxLength={10} onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/[^0-9]/g, "").slice(0, 10), })} /></Field>
             </div>
-            <Field label="Emergency contact number (shown on the ID card)"><input className={inputClass} inputMode="tel" placeholder="Family member or colleague to call in an emergency" value={form.emergencyContact} onChange={(e) => setForm({ ...form, emergencyContact: e.target.value })} /></Field>
+            <Field label="Emergency contact number (shown on the ID card)"><input className={inputClass} inputMode="tel" placeholder="Family member or colleague to call in an emergency" value={form.emergencyContact} maxLength={10} onChange={(e) => setForm({ ...form, emergencyContact: e.target.value.replace(/[^0-9]/g, "").slice(0, 10)} )} /></Field>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Date of birth (shown on the ID card)"><input type="date" className={inputClass} max={new Date().toISOString().slice(0, 10)} value={form.dateOfBirth} onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })} /></Field>
               <Field label="Base location"><input className={inputClass} value={form.baseLocation} onChange={(e) => setForm({ ...form, baseLocation: e.target.value })} /></Field>

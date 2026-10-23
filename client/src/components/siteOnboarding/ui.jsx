@@ -83,7 +83,7 @@ export function ProgressBar({ value }) {
 export function Modal({ title, children, onClose, wide }) {
   const modalElement = (
     <div
-      className="anim-fade fixed inset-0 z-[9999] flex h-screen w-screen items-center justify-center bg-[#141413]/45 p-4 backdrop-blur-[2px]"
+      className="anim-fade fixed inset-0 z-[999] flex h-screen w-screen items-center justify-center bg-[#141413]/45 p-4 backdrop-blur-[2px]"
       onClick={(e) => {
         if (e.target === e.currentTarget && onClose) onClose();
       }}

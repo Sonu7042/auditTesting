@@ -10,6 +10,147 @@ import { Pill } from "./shared";
 import AuditorIdCard, { PhotoUpload } from "./AuditorIdCard";
 import DocumentViewer from "../common/DocumentViewer";
 
+
+//  Add You tube Video
+function YouTubeTrainingPlayer({ videoUrl, sendProgress }) {
+  const containerRef = useRef(null);
+  const playerRef = useRef(null);
+  const timerRef = useRef(null);
+  const lastProgressRef = useRef(0);
+  const sendProgressRef = useRef(sendProgress);
+
+  useEffect(() => {
+    sendProgressRef.current = sendProgress;
+  }, [sendProgress]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    function getVideoId(url) {
+      try {
+        const parsed = new URL(url);
+
+        if (parsed.hostname.includes("youtu.be")) {
+          return parsed.pathname.slice(1);
+        }
+
+        return (
+          parsed.searchParams.get("v") ||
+          parsed.pathname.match(/\/embed\/([^/?]+)/)?.[1] ||
+          null
+        );
+      } catch {
+        return null;
+      }
+    }
+
+    function stopTimer() {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+
+    function loadYouTubeAPI() {
+      return new Promise((resolve) => {
+        if (window.YT?.Player) {
+          resolve(window.YT);
+          return;
+        }
+
+        const previousCallback = window.onYouTubeIframeAPIReady;
+
+        window.onYouTubeIframeAPIReady = () => {
+          previousCallback?.();
+          resolve(window.YT);
+        };
+
+        if (
+          !document.querySelector(
+            'script[src="https://www.youtube.com/iframe_api"]'
+          )
+        ) {
+          const script = document.createElement("script");
+          script.src = "https://www.youtube.com/iframe_api";
+          document.head.appendChild(script);
+        }
+      });
+    }
+
+    const videoId = getVideoId(videoUrl);
+
+    if (!videoId || !containerRef.current) return;
+
+    loadYouTubeAPI().then((YT) => {
+      if (cancelled || !containerRef.current) return;
+
+      const target = document.createElement("div");
+      containerRef.current.replaceChildren(target);
+
+      playerRef.current = new YT.Player(target, {
+        videoId,
+        width: "100%",
+        height: "100%",
+        playerVars: {
+          controls: 1,
+          playsinline: 1,
+        },
+        events: {
+          onStateChange: (event) => {
+            if (event.data === YT.PlayerState.PLAYING) {
+              if (timerRef.current) return;
+
+              timerRef.current = setInterval(() => {
+                const player = playerRef.current;
+                if (!player) return;
+
+                const duration = player.getDuration();
+                const currentTime = player.getCurrentTime();
+
+                if (!duration || duration <= 0) return;
+
+                const percent = Math.min(
+                  99,
+                  Math.floor((currentTime / duration) * 100)
+                );
+
+                if (percent > lastProgressRef.current) {
+                  lastProgressRef.current = percent;
+                  sendProgressRef.current(percent);
+                }
+              }, 1000);
+            } else {
+              stopTimer();
+            }
+
+            if (event.data === YT.PlayerState.ENDED) {
+              stopTimer();
+              lastProgressRef.current = 100;
+              sendProgressRef.current(100);
+            }
+          },
+        },
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      stopTimer();
+      playerRef.current?.destroy();
+      playerRef.current = null;
+    };
+  }, [videoUrl]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full aspect-video overflow-hidden rounded-xl bg-black"
+    />
+  );
+}
+
+// end
+
 export default function AuditorTraining() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -100,7 +241,13 @@ export default function AuditorTraining() {
           <section className={cardClass}>
             <h2 className="mb-3 text-lg font-semibold">1. Training video</h2>
             {content.videoUrl ? (
-              <video controls className="w-full rounded-xl bg-black" src={content.videoUrl} onTimeUpdate={onTime} onEnded={() => sendProgress(100)} />
+              // <video controls className="w-full rounded-xl bg-black" src={content.videoUrl} onTimeUpdate={onTime} onEnded={() => sendProgress(100)} /> 
+           
+              <YouTubeTrainingPlayer
+                videoUrl={content.videoUrl}
+                sendProgress={sendProgress}
+              />
+  
             ) : (
               <div className="flex h-44 flex-col items-center justify-center rounded-xl bg-[#f3f5f7] text-sm text-gray-500">
                 <p>Training video not uploaded yet.</p>
