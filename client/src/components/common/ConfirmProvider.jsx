@@ -42,7 +42,7 @@ export default function ConfirmProvider({ children }) {
       className="anim-fade fixed inset-0 z-[99999] flex h-screen w-screen items-center justify-center bg-[#141413]/60 p-4 backdrop-blur-[2px]"
       onMouseDown={(e) => e.target === e.currentTarget && close(false)}
     >
-      
+
       <div
         role="alertdialog"
         aria-modal="true"
