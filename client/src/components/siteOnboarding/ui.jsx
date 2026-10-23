@@ -10,11 +10,13 @@ export const darkBtn =
 export const lightBtn =
   "inline-flex items-center gap-2 rounded-xl border border-[#CECECE] bg-white px-4 py-2.5 text-sm font-medium text-[#20242c] hover:bg-gray-50 disabled:opacity-50";
 
-export function Field({ label, children, span }) {
+  
+export function Field({ label, children, span, error }) {
   return (
     <label className={`block ${span || ""}`}>
       <span className={labelClass}>{label}</span>
       {children}
+      {error && <span className="mt-1 block text-xs text-red-500">{error}</span>}
     </label>
   );
 }

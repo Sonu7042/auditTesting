@@ -22,6 +22,7 @@ export default function AuditorCards() {
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState(empty);
+  const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [created, setCreated] = useState(null);
   const [showImport, setShowImport] = useState(false);
@@ -32,13 +33,55 @@ export default function AuditorCards() {
   };
   useEffect(() => { load(); }, []);
 
+  const openAdd = () => {
+    setForm(empty);
+    setErrors({});
+    setShowAdd(true);
+  };
+
+  const closeAdd = () => {
+    setShowAdd(false);
+    setForm(empty);
+    setErrors({});
+  };
+
   const toggleSkill = (s) => setForm((f) => ({ ...f, skills: f.skills.includes(s) ? f.skills.filter((x) => x !== s) : [...f.skills, s] }));
   const save = async () => {
+    const errs = {};
+    if (!form.fullName?.trim()) {
+      errs.fullName = "Full name is required.";
+    }
+    if (!form.email?.trim()) {
+      errs.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      errs.email = "Please enter a valid email address.";
+    }
+
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
+    setErrors({});
+
     if (!(await confirm({ title: "Create this auditor and send login details?", message: `${form.fullName} will be registered as an auditor.`, points: ["A temporary username and password are generated", `They are emailed to ${form.email} when email is set up; otherwise you share them`, "The auditor must finish training, the quiz and the demo checklist before they can be assigned"], confirmLabel: "Create & send login" }))) return;
     setSaving(true);
     try {
       const { data } = await axios.post(`${domain}/auditor-onboarding`, form);
-      setShowAdd(false); setForm(empty); setCreated(data); load();
+      closeAdd();
+      setCreated(data);
+      load();
+    } catch (err) {
+      const resData = err.response?.data;
+      if (resData?.errors) {
+        setErrors(resData.errors);
+      } else if (resData?.message) {
+        const msg = resData.message;
+        if (msg.toLowerCase().includes("email")) {
+          setErrors({ email: msg });
+        } else if (msg.toLowerCase().includes("name")) {
+          setErrors({ fullName: msg });
+        }
+      }
     } finally { setSaving(false); }
   };
 
@@ -59,7 +102,7 @@ export default function AuditorCards() {
         crumbs={[{ label: "Auditor Onboarding" }]}
         title="Auditors"
         subtitle="Create an auditor to start onboarding: training, quiz and demo, Back-Admin review, then approval."
-        actions={<><ImportButton label="Import auditors" onClick={() => setShowImport(true)} /><button className={darkBtn} onClick={() => setShowAdd(true)}><Plus size={16} /> Add Auditor</button></>}
+        actions={<><ImportButton label="Import auditors" onClick={() => setShowImport(true)} /><button className={darkBtn} onClick={openAdd}><Plus size={16} /> Add Auditor</button></>}
       />
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <div className="relative w-full max-w-xs">
@@ -103,19 +146,37 @@ export default function AuditorCards() {
               {a.scoreBasis && <p className="mt-2 text-xs text-gray-500">{a.scoreBasis}</p>}
             </button>
           ))}
-          <button type="button" onClick={() => setShowAdd(true)} className="flex min-h-[170px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-[#CECECE] text-sm text-gray-500 hover:border-[#63C174] hover:text-[#287a37]">
+          <button type="button" onClick={openAdd} className="flex min-h-[170px] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-[#CECECE] text-sm text-gray-500 hover:border-[#63C174] hover:text-[#287a37]">
             <Plus size={28} /> Add auditor
           </button>
         </div>
       )}
 
       {showAdd && (
-        <Modal title="Step 1 · Create auditor" onClose={() => setShowAdd(false)}>
+        <Modal title="Step 1 · Create auditor" onClose={closeAdd}>
           <div className="space-y-4">
-            <Field label="Full name *"><input className={inputClass} value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} /></Field>
+            <Field label="Full name *" error={errors.fullName}>
+              <input
+                className={`${inputClass} ${errors.fullName ? "!border-red-500 focus:!border-red-500 focus:!ring-red-500/20" : ""}`}
+                value={form.fullName}
+                onChange={(e) => {
+                  setForm({ ...form, fullName: e.target.value });
+                  if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: "" }));
+                }}
+              />
+            </Field>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Email *"><input className={inputClass} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
-              <Field label="Phone"><input className={inputClass} value={form.phone}  maxLength={10} onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/[^0-9]/g, "").slice(0, 10), })} /></Field>
+              <Field label="Email *" error={errors.email}>
+                <input
+                  className={`${inputClass} ${errors.email ? "!border-red-500 focus:!border-red-500 focus:!ring-red-500/20" : ""}`}
+                  value={form.email}
+                  onChange={(e) => {
+                    setForm({ ...form, email: e.target.value });
+                    if (errors.email) setErrors((prev) => ({ ...prev, email: "" }));
+                  }}
+                />
+              </Field>
+              <Field label="Phone"><input className={inputClass} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
             </div>
             <Field label="Emergency contact number (shown on the ID card)"><input className={inputClass} inputMode="tel" placeholder="Family member or colleague to call in an emergency" value={form.emergencyContact} maxLength={10} onChange={(e) => setForm({ ...form, emergencyContact: e.target.value.replace(/[^0-9]/g, "").slice(0, 10)} )} /></Field>
             <div className="grid grid-cols-2 gap-4">
@@ -138,7 +199,7 @@ export default function AuditorCards() {
             <Field label="Notes"><textarea rows="2" className={inputClass} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
             <p className="text-xs text-gray-500">A temporary username and password are generated and emailed to the auditor, who then completes the training.</p>
             <div className="flex justify-end gap-2">
-              <button className={lightBtn} onClick={() => setShowAdd(false)}>Cancel</button>
+              <button className={lightBtn} onClick={closeAdd}>Cancel</button>
               <button className={darkBtn} disabled={saving} onClick={save}>{saving ? "Creating..." : "Create & send login"}</button>
             </div>
           </div>

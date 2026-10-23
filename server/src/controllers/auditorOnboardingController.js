@@ -71,9 +71,19 @@ const emailCredentials = async (email, fullName, username, password) => {
 // Creates one auditor (login + qualification + onboarding record). Used by the single form and the Excel import.
 const createAuditor = async (body, byUserId = null) => {
   const fullName = str(body.fullName); const email = str(body.email).toLowerCase();
-  if (!fullName) throw fail("Full name is required.");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw fail("A valid email is required to send the login details.");
-  if (await prisma.user.findUnique({ where: { email }, select: { id: true } })) throw fail("A user with this email already exists.");
+  const errors = {};
+  if (!fullName) errors.fullName = "Full name is required.";
+  if (!email) {
+    errors.email = "Email is required.";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.email = "A valid email is required to send the login details.";
+  }
+  if (Object.keys(errors).length > 0) {
+    throw fail(errors.fullName || errors.email, 400, errors);
+  }
+  if (await prisma.user.findUnique({ where: { email }, select: { id: true } })) {
+    throw fail("A user with this email already exists.", 400, { email: "A user with this email already exists." });
+  }
   const skills = list(body.skills).map((s) => s.toUpperCase());
   if (skills.some((s) => !SKILLS.includes(s))) throw fail("Invalid skill selected.");
   const regions = list(body.supportedRegions).map((r) => r.toUpperCase());

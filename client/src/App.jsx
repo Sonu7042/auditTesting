@@ -502,7 +502,18 @@ const App = () => {
   return (
     <BrowserRouter>
       <ConfirmProvider>
-      <Toaster position="bottom-right" reverseOrder={false} />
+      <Toaster
+        position="bottom-right"
+        reverseOrder={false}
+        containerStyle={{
+          zIndex: 999999,
+        }}
+        toastOptions={{
+          style: {
+            zIndex: 999999,
+          },
+        }}
+      />
       <AuthExpiredRedirect />
       <ToastAlertBridge />
       <ThemeFloatingToggle />
