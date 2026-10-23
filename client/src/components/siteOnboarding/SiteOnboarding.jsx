@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Building2, Plus } from "lucide-react";
+import { Building2, Pencil, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import Header from "../adminDashboard/Header";
 import domain from "../../api/domain";
@@ -14,7 +14,8 @@ export default function SiteOnboarding() {
   const navigate = useNavigate();
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAdd, setShowAdd] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [editingCompany, setEditingCompany] = useState(null);
   const [form, setForm] = useState(emptyCompany);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -30,10 +31,32 @@ export default function SiteOnboarding() {
   };
   useEffect(() => { load(); }, []);
 
-  const closeAdd = () => {
-    setShowAdd(false);
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingCompany(null);
     setForm(emptyCompany);
     setErrors({});
+  };
+
+  const openAdd = () => {
+    setEditingCompany(null);
+    setForm(emptyCompany);
+    setErrors({});
+    setShowModal(true);
+  };
+
+  const openEdit = (company) => {
+    setEditingCompany(company);
+    setForm({
+      companyName: company.companyName || "",
+      email: company.email || "",
+      address: company.address || "",
+      contactName: company.contactName || "",
+      contactPhone: company.contactPhone || "",
+      logoUrl: company.logoUrl || "",
+    });
+    setErrors({});
+    setShowModal(true);
   };
 
   const onLogo = (event) => {
@@ -56,22 +79,20 @@ export default function SiteOnboarding() {
     setErrors({});
     setSaving(true);
     try {
-      await axios.post(`${domain}/company/create-company`, form, { showSuccessToast: true });
-      closeAdd();
+      if (editingCompany) {
+        await axios.put(`${domain}/company/updateCompany/${editingCompany.id}`, form, { showSuccessToast: true });
+      } else {
+        await axios.post(`${domain}/company/create-company`, form, { showSuccessToast: true });
+      }
+      closeModal();
       await load();
     } catch (error) {
-      const msg = error.response?.data?.message || "Failed to create company";
+      const msg = error.response?.data?.message || (editingCompany ? "Failed to update company" : "Failed to create company");
       setErrors({ companyName: msg });
       toast.error(msg);
     } finally {
       setSaving(false);
     }
-  };
-
-  const openAdd = () => {
-    setForm(emptyCompany);
-    setErrors({});
-    setShowAdd(true);
   };
 
   return (
@@ -98,21 +119,44 @@ export default function SiteOnboarding() {
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {companies.map((company) => (
-            <button
+            <div
               key={company.id}
-              type="button"
+              role="button"
+              tabIndex={0}
               onClick={() => navigate(`/admin-dashboard/site-onboarding/${company.id}`)}
-              className="group rounded-3xl bg-white p-5 text-left shadow-[0_2px_6px_rgba(0,0,0,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.12)]"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  navigate(`/admin-dashboard/site-onboarding/${company.id}`);
+                }
+              }}
+              className="group relative flex flex-col justify-between rounded-3xl bg-white p-5 text-left shadow-[0_2px_6px_rgba(0,0,0,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.12)] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#30733b]/30"
             >
-              <CompanyLogo company={company} />
-              <h3 className="mt-4 text-base font-semibold text-[#20242c]">{company.companyName}</h3>
-              <p className="mt-1 truncate text-xs text-gray-500">{company.address || company.email || "No address added"}</p>
+              <div>
+                <div className="flex items-start justify-between gap-2">
+                  <CompanyLogo company={company} />
+                  <button
+                    type="button"
+                    title="Edit company"
+                    aria-label={`Edit ${company.companyName}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEdit(company);
+                    }}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 hover:shadow-sm"
+                  >
+                    <Pencil size={15} />
+                  </button>
+                </div>
+                <h3 className="mt-4 text-base font-semibold text-[#20242c]">{company.companyName}</h3>
+                <p className="mt-1 truncate text-xs text-gray-500">{company.address || company.email || "No address added"}</p>
+              </div>
               <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
                 <div className="rounded-xl bg-[#f3f5f7] py-2"><div className="text-base font-semibold">{company.siteCount}</div>Sites</div>
                 <div className="rounded-xl bg-[#fff6e8] py-2"><div className="text-base font-semibold">{company.draftCount}</div>Drafts</div>
                 <div className="rounded-xl bg-[#e8f1fd] py-2"><div className="text-base font-semibold">{company.submittedCount}</div>In review</div>
               </div>
-            </button>
+            </div>
           ))}
           <button
             type="button"
@@ -124,15 +168,26 @@ export default function SiteOnboarding() {
         </div>
       )}
 
-      {showAdd && (
-        <Modal title="Add company" onClose={closeAdd}>
+      {showModal && (
+        <Modal title={editingCompany ? "Edit company" : "Add company"} onClose={closeModal}>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <CompanyLogo company={{ companyName: form.companyName || "?", logoUrl: form.logoUrl }} />
-              <label className={`${lightBtn} cursor-pointer`}>
-                Upload logo
-                <input type="file" accept="image/*" className="hidden" onChange={onLogo} />
-              </label>
+              <div className="flex flex-col gap-1">
+                <label className={`${lightBtn} cursor-pointer`}>
+                  {form.logoUrl ? "Change logo" : "Upload logo"}
+                  <input type="file" accept="image/*" className="hidden" onChange={onLogo} />
+                </label>
+                {form.logoUrl && (
+                  <button
+                    type="button"
+                    className="text-left text-xs text-red-500 hover:text-red-700 hover:underline"
+                    onClick={() => setForm((prev) => ({ ...prev, logoUrl: "" }))}
+                  >
+                    Remove logo
+                  </button>
+                )}
+              </div>
             </div>
             <Field label="Company name *" error={errors.companyName}>
               <input
@@ -152,8 +207,10 @@ export default function SiteOnboarding() {
               <Field label="Contact phone"><input className={inputClass} value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} /></Field>
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <button className={lightBtn} onClick={closeAdd}>Cancel</button>
-              <button className={darkBtn} disabled={saving} onClick={save}>{saving ? "Saving..." : "Save company"}</button>
+              <button className={lightBtn} onClick={closeModal}>Cancel</button>
+              <button className={darkBtn} disabled={saving} onClick={save}>
+                {saving ? "Saving..." : (editingCompany ? "Save changes" : "Save company")}
+              </button>
             </div>
           </div>
         </Modal>
