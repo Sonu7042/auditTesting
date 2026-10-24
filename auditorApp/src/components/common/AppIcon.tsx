@@ -50,16 +50,45 @@ const paths: Record<string, string[]> = {
   upload: ['M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4', 'm17 8-5-5-5 5', 'M12 3v12'],
   user: ['M20 21a8 8 0 0 0-16 0', 'M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z'],
   x: ['M18 6 6 18', 'M6 6l12 12'],
+  home: ['M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8', 'M3 10a2 2 0 0 1 .7-1.5l7-6a2 2 0 0 1 2.6 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z'],
+  'clipboard-list': ['M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z', 'M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2', 'M12 11h4', 'M12 16h4', 'M8 11h.01', 'M8 16h.01'],
+  flag: ['M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.3 2 1.3 0 2.4-.3 3.1-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.5'],
+  'message-square': ['M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z'],
+  award: ['M15.5 12.9 17 22l-5-3-5 3 1.5-9.1'],
+  'cloud-off': ['m2 2 20 20', 'M5.8 5.8A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.3-.2', 'M21.5 16.5A4.5 4.5 0 0 0 17.5 10h-1.8A7 7 0 0 0 10 5.1'],
+  delete: ['M10 5a2 2 0 0 0-1.3.5l-6.4 5.8a1 1 0 0 0 0 1.4l6.4 5.8A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z', 'm12 9 6 6', 'm18 9-6 6'],
+  'alert-circle': ['M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z', 'M12 8v4', 'M12 16h.01'],
+  phone: ['M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.6 2.8.7a2 2 0 0 1 1.7 2Z'],
+  'shield-check': ['M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1Z', 'm9 12 2 2 4-4'],
+  'graduation-cap': ['M21.4 10.9a1 1 0 0 0 0-1.8l-8.6-3.9a2 2 0 0 0-1.7 0L2.6 9.1a1 1 0 0 0 0 1.8l8.6 3.9a2 2 0 0 0 1.7 0Z', 'M22 10v6', 'M6 12.5V16a6 3 0 0 0 12 0v-3.5'],
+  'id-card': ['M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z', 'M15 10h3', 'M15 14h3', 'M6.2 16a3 3 0 0 1 5.6 0'],
+  minus: ['M5 12h14'],
+  lock: ['M7 11V7a5 5 0 0 1 10 0v4', 'M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z'],
+  share: ['M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8', 'm16 6-4-4-4 4', 'M12 2v13'],
+  wifi: ['M12 20h.01', 'M2 8.8a15 15 0 0 1 20 0', 'M5 12.9a10 10 0 0 1 14 0', 'M8.5 16.4a5 5 0 0 1 7 0'],
+  play: ['m6 3 14 9-14 9Z'],
+  thermometer: ['M14 4v10.5a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z'],
+  info: ['M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z', 'M12 16v-4', 'M12 8h.01'],
+  'git-branch': ['M6 3v12', 'M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', 'M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', 'M18 9a9 9 0 0 1-9 9'],
+  'folder-open': ['m6 14 1.5-2.9A2 2 0 0 1 9.2 10H20a2 2 0 0 1 1.9 2.5l-1.5 6A2 2 0 0 1 18.4 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.7.9l.8 1.2a2 2 0 0 0 1.7.9H18a2 2 0 0 1 2 2v2'],
+};
+
+const circles: Record<string, Array<[number, number, number]>> = {
+  camera: [[12, 13, 3]],
+  eye: [[12, 12, 3]],
+  image: [[8.5, 8.5, 1.5]],
+  'map-pin': [[12, 10, 3]],
+  award: [[12, 8, 6]],
+  'id-card': [[9, 11, 2]],
 };
 
 export default function AppIcon({name, size = 24, color = '#222', style}: Props) {
   const iconPaths = paths[name] || paths['help-circle'];
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={style}>
-      {name === 'camera' && <Circle cx="12" cy="13" r="3" stroke={color} strokeWidth={1.8} />}
-      {name === 'eye' && <Circle cx="12" cy="12" r="3" stroke={color} strokeWidth={1.8} />}
-      {name === 'image' && <Circle cx="8.5" cy="8.5" r="1.5" stroke={color} strokeWidth={1.8} />}
-      {name === 'map-pin' && <Circle cx="12" cy="10" r="3" stroke={color} strokeWidth={1.8} />}
+      {(circles[name] || []).map(([cx, cy, r]) => (
+        <Circle key={`${name}-c${cx}-${cy}`} cx={cx} cy={cy} r={r} stroke={color} strokeWidth={1.8} />
+      ))}
       {iconPaths.map((d, index) => (
         <Path key={`${name}-${index}`} d={d} stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
       ))}

@@ -1,49 +1,40 @@
 import React from 'react';
 import {ActivityIndicator, StyleSheet, View} from 'react-native';
-import {DarkTheme, DefaultTheme, NavigationContainer} from '@react-navigation/native';
+import {DefaultTheme, NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {useAuth} from '../store/AuthContext';
-import {PortalLoginScreen} from '../screens/auth/PortalLoginScreen';
-import {SetPinScreen} from '../screens/auth/SetPinScreen';
-import {AuditorNavigator} from './AuditorNavigator';
-import {useAppTheme} from '../store/ThemeContext';
+import {FieldLoginScreen} from '../screens/field/auth/FieldLoginScreen';
+import {ChangePasswordScreen} from '../screens/field/auth/ChangePasswordScreen';
+import {PinScreen} from '../screens/field/auth/PinScreen';
+import {FieldNavigator} from './FieldNavigator';
+import {c} from '../ui/theme';
 
 const S = createNativeStackNavigator();
 
+const theme = {...DefaultTheme, colors: {...DefaultTheme.colors, primary: c.green, background: c.bg, card: c.surface, border: c.line, text: c.text}};
+
 export function RootNavigator() {
   const {user, booting, pinRequired} = useAuth();
-  const {isDark} = useAppTheme();
-
-  const navigationTheme = isDark
-    ? {
-        ...DarkTheme,
-        colors: {
-          ...DarkTheme.colors,
-          primary: '#8B80FF',
-          background: '#111827',
-          card: '#1F2937',
-          border: '#374151',
-        },
-      }
-    : DefaultTheme;
 
   if (booting) {
     return (
-      <View style={[styles.loading, isDark && styles.loadingDark]}>
-        <ActivityIndicator color="#0047B3" />
+      <View style={styles.loading}>
+        <ActivityIndicator color={c.green} />
       </View>
     );
   }
 
   return (
-    <NavigationContainer theme={navigationTheme}>
-      <S.Navigator screenOptions={{headerShown: false}}>
+    <NavigationContainer theme={theme}>
+      <S.Navigator screenOptions={{headerShown: false, contentStyle: {backgroundColor: c.bg}}}>
         {!user ? (
-          <S.Screen name="Login" component={PortalLoginScreen} />
+          <S.Screen name="Login" component={FieldLoginScreen} />
+        ) : user.mustChangePassword ? (
+          <S.Screen name="ChangePassword" component={ChangePasswordScreen} />
         ) : pinRequired ? (
-          <S.Screen name="SetPin" component={SetPinScreen} />
+          <S.Screen name="Pin" component={PinScreen} />
         ) : (
-          <S.Screen name="Auditor" component={AuditorNavigator} />
+          <S.Screen name="Field" component={FieldNavigator} />
         )}
       </S.Navigator>
     </NavigationContainer>
@@ -51,6 +42,5 @@ export function RootNavigator() {
 }
 
 const styles = StyleSheet.create({
-  loading: {flex: 1, alignItems: 'center', justifyContent: 'center'},
-  loadingDark: {backgroundColor: '#111827'},
+  loading: {flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.bg},
 });

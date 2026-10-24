@@ -5,32 +5,24 @@ import { RootNavigator } from './src/navigation/RootNavigator';
 import { AuthProvider } from './src/store/AuthContext';
 import { AuditContextProvider } from './src/store/AuditContext';
 import { NotificationProvider } from './src/store/NotificationContext';
-import { ThemeProvider, useAppTheme } from './src/store/ThemeContext';
-
-function ThemedApp() {
-  const {isDark} = useAppTheme();
-  return (
-    <>
-      <StatusBar
-        barStyle={isDark ? 'light-content' : 'dark-content'}
-      />
-      <RootNavigator />
-    </>
-  );
-}
+import { OutboxProvider } from './src/store/OutboxContext';
+import { ThemeProvider } from './src/store/ThemeContext';
 
 export default function App(): React.JSX.Element {
   return (
-    <SafeAreaProvider>    
+    <SafeAreaProvider>
       <AuthProvider>
         <AuditContextProvider>
           <ThemeProvider>
             <NotificationProvider>
-              <ThemedApp />
+              <OutboxProvider>
+                <StatusBar barStyle="dark-content" />
+                <RootNavigator />
+              </OutboxProvider>
             </NotificationProvider>
           </ThemeProvider>
         </AuditContextProvider>
-      </AuthProvider> 
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

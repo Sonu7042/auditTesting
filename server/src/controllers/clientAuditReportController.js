@@ -4,8 +4,17 @@ const PDFDocument = require("pdfkit");
 const prisma = require("../config/prisma");
 const uploadToCloudinary = require("../utils/cloudinaryUpload");
 const { locationWhereForUser } = require("../utils/scope");
+const { createNotification } = require("../utils/notificationService");
 
-const fail = (statusCode, message) => Object.assign(new Error(message), { statusCode });
+// The lead auditor fixes QC corrections, so they are told as soon as a report comes back to them.
+const notifyLead = (report, title, message, actorId) => {
+  const lead = report.job.assignments.find((a) => a.assignmentRole === "LEAD");
+  if (!lead) return Promise.resolve();
+  return createNotification({ title, message: `${report.reportNumber}: ${message.slice(0, 120)}`, type: "REPORT_RETURNED", recipientId: lead.auditorId, createdById: actorId, link: `/auditor-dashboard/reports-hub/${report.id}` })
+    .catch((error) => console.error("Report return notification failed:", error));
+};
+
+const fail =(statusCode, message) => Object.assign(new Error(message), { statusCode });
 const categories = new Set(["INCORRECT_RESPONSE", "INSUFFICIENT_EVIDENCE", "EVIDENCE_QUALITY", "SCORING_MISMATCH", "MISSING_OBSERVATION", "RISK_CLASSIFICATION", "MEASUREMENT_VERIFICATION", "REPORT_DETAIL"]);
 const priorities = new Set(["LOW", "MEDIUM", "HIGH", "CRITICAL"]);
 const results = new Set(["COMPLIANT", "NON_COMPLIANT", "NA"]);
@@ -100,6 +109,7 @@ exports.review = async (req, res, next) => { try {
   }, include: reportInclude });
   // Issuing a revision completes the changes the dealer asked for.
   if (action === "PUBLISH") await prisma.reportClarification.updateMany({ where: { reportId: report.id, status: "ACCEPTED" }, data: { status: "ACTIONED", resolvedInRevision: updated.revision } });
+  if (action === "RETURN") await notifyLead(report, "Report returned by QC", remarks, req.user.id);
   res.json({ success: true, message: `Report status updated to ${nextStatus}.`, report: updated });
 } catch (error) { next(error); } };
 
@@ -121,6 +131,7 @@ exports.createCorrection = async (req, res, next) => { try {
     await tx.clientAuditReport.update({ where: { id: report.id }, data: { status: "CORRECTION_REQUIRED", reviewRemarks: instruction, history: { create: { action: "CORRECTION_RAISED", fromStatus: report.status, toStatus: "CORRECTION_REQUIRED", remarks: instruction, actorId: req.user.id } } } });
     return created;
   });
+  await notifyLead(report, "Report returned by QC", instruction, req.user.id);
   res.status(201).json({ success: true, message: "Correction point sent to the lead auditor.", correction });
 } catch (error) { next(error); } };
 
@@ -168,6 +179,7 @@ exports.reviewCorrection = async (req, res, next) => { try {
     const nextStatus = action === "ACCEPT" && unresolved === 0 ? "UNDER_REVIEW" : "CORRECTION_REQUIRED";
     await tx.clientAuditReport.update({ where: { id: report.id }, data: { status: nextStatus, reviewRemarks: remarks || null, history: { create: { action: action === "ACCEPT" ? "CORRECTION_ACCEPTED" : "CORRECTION_REOPENED", fromStatus: report.status, toStatus: nextStatus, remarks: remarks || null, actorId: req.user.id } } } });
   });
+  if (action === "REOPEN") await notifyLead(report, "Correction reopened by QC", remarks, req.user.id);
   res.json({ success: true, message: action === "ACCEPT" ? "Correction accepted." : "Correction reopened for the auditor.", report: await scoped(report.id, req.user) });
 } catch (error) { next(error); } };
 
