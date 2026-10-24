@@ -1,2 +1,7 @@
 node_modules/
 scripts/output/
+
+
+.env
+.env.*
+!.env.example
