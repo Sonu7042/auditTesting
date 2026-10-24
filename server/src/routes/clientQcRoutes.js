@@ -16,7 +16,7 @@ router.get("/template/docx", authorize("ADMIN"), docx.template);
 router.get("/reports/:id/facade", authorize(...VIEW), docx.facade);
 router.get("/reports/:id/revisions", authorize(...VIEW), docx.revisions);
 router.get("/reports/:id/docx-options", authorize(...VIEW), docx.options);
-router.get("/reports/:id/docx", authorize(...VIEW), docx.download);
+router.get("/reports/:id/docx", authorize(...VIEW, "AUDITOR"), docx.download);
 router.get("/reports/:id/audit-pdf", authorize(...VIEW), docx.pdf);
 router.get("/reports/:id/pdf", authorize("ADMIN", "CORPORATE_MANAGER", "ZONAL_MANAGER", "REGIONAL_MANAGER", "SITE_INCHARGE", "SITE_USER"), c.reportPdf);
 router.get("/reports/:id", authorize("ADMIN", "CORPORATE_MANAGER", "REGIONAL_MANAGER", "ZONAL_MANAGER", "SITE_INCHARGE", "SITE_USER"), c.detail);

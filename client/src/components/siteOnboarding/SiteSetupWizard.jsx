@@ -213,7 +213,7 @@ export default function SiteSetupWizard() {
   const id = data.identity; const loc = data.location;
   const text = (group, field, label, extra = {}) => (
     <Field label={label} span={extra.span}>
-      <input type={extra.type || "text"} disabled={!editable} className={inputClass} value={data[group][field] ?? ""} maxLength={10} onChange={(e) => setIn(group,
+      <input type={extra.type || "text"} disabled={!editable} className={inputClass} value={data[group][field] ?? ""} maxLength={group === "location" && field === "contactPhone" ? 10 : undefined} onChange={(e) => setIn(group,
         field,
         group === "location" && field === "contactPhone"
           ? e.target.value.replace(/[^0-9]/g, "").slice(0, 10)

@@ -12,7 +12,9 @@ const DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.doc
 const loadReport = async (req) => {
   const report = await prisma.clientAuditReport.findUnique({ where: { id: req.params.id }, include: fullInclude });
   if (!report) throw fail("Report not found.", 404);
-  if (req.user.role !== "ADMIN") {
+  if (req.user.role === "AUDITOR") {
+    if (!report.job.assignments.some((a) => a.auditorId === req.user.id)) throw fail("You cannot access this report.", 403);
+  } else if (req.user.role !== "ADMIN") {
     const visible = await prisma.dealerLocation.count({ where: { AND: [await locationWhereForUser(req.user), { id: report.job.location.id }] } });
     if (!visible || !["PUBLISHED", "SIGNED_OFF"].includes(report.status)) throw fail("You cannot access this report.", 403);
   }
