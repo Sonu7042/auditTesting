@@ -364,8 +364,10 @@ const cardFor = async (userId) => {
   const user = await prisma.user.findUnique({ where: { id: userId }, include: userInclude });
   if (!user || user.role !== "AUDITOR" || !user.auditorOnboarding) throw fail("Auditor not found.", 404);
   const o = user.auditorOnboarding; const q = user.auditorQualification;
-  return { userId, fullName: user.fullName, email: user.email, phone: o.phone, baseLocation: o.baseLocation, dateOfBirth: o.dateOfBirth, emergencyContact: o.emergencyContact, status: o.status, photoUrl: o.photoUrl, auditorCode: o.auditorCode, idIssuedAt: o.idIssuedAt, approvedAt: o.approvedAt,
-    skills: q?.skills || [], regions: q?.supportedRegions || [], authorityLetterNumber: q?.authorityLetterNumber || null, certificationExpiresAt: q?.certificationExpiresAt || null, shadowAudits: q?.shadowAuditsCompleted || 0, backgroundVerified: Boolean(q?.backgroundVerified) };
+  return {
+    userId, fullName: user.fullName, email: user.email, phone: o.phone, baseLocation: o.baseLocation, dateOfBirth: o.dateOfBirth, emergencyContact: o.emergencyContact, status: o.status, photoUrl: o.photoUrl, auditorCode: o.auditorCode, idIssuedAt: o.idIssuedAt, approvedAt: o.approvedAt,
+    skills: q?.skills || [], regions: q?.supportedRegions || [], authorityLetterNumber: q?.authorityLetterNumber || null, certificationExpiresAt: q?.certificationExpiresAt || null, shadowAudits: q?.shadowAuditsCompleted || 0, backgroundVerified: Boolean(q?.backgroundVerified)
+  };
 };
 const ownCard = async (req) => {
   const id = req.user.role === "AUDITOR" ? req.user.id : req.params.userId;

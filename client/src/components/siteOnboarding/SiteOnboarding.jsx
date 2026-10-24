@@ -204,11 +204,11 @@ export default function SiteOnboarding() {
                 placeholder="M&M - NORTH"
               />
             </Field>
-            <Field label="Email"><input className={inputClass} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+            <Field label="Email *"><input className={inputClass} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
             <Field label="Address"><textarea rows="2" className={inputClass} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} /></Field>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Contact name"><input className={inputClass} value={form.contactName} onChange={(e) => setForm({ ...form, contactName: e.target.value })} /></Field>
-              <Field label="Contact phone"><input className={inputClass} value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} /></Field>
+              <Field label="Contact phone *"><input className={inputClass} value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })} /></Field>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button className={lightBtn} onClick={closeModal}>Cancel</button>

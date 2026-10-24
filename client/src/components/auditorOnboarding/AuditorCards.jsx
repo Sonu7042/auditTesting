@@ -45,7 +45,10 @@ export default function AuditorCards() {
     setErrors({});
   };
 
-  const toggleSkill = (s) => setForm((f) => ({ ...f, skills: f.skills.includes(s) ? f.skills.filter((x) => x !== s) : [...f.skills, s] }));
+  const toggleSkill = (s) => {
+    setForm((f) => ({ ...f, skills: f.skills.includes(s) ? f.skills.filter((x) => x !== s) : [...f.skills, s] }));
+    if (errors.skills) setErrors((prev) => ({ ...prev, skills: "" }));
+  };
   const save = async () => {
     const errs = {};
     if (!form.fullName?.trim()) {
@@ -55,6 +58,29 @@ export default function AuditorCards() {
       errs.email = "Email is required.";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       errs.email = "Please enter a valid email address.";
+    }
+
+    const cleanPhone = (form.phone || "").trim();
+    if (!cleanPhone) {
+      errs.phone = "Phone number is required.";
+    } else if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      errs.phone = "Please enter a valid 10-digit mobile number.";
+    }
+
+    if (!form.skills || form.skills.length === 0) {
+      errs.skills = "Please select at least one skill.";
+    }
+
+    if (form.supportedRegions && form.supportedRegions.trim()) {
+      const reg = form.supportedRegions.trim();
+      if (!/^[A-Za-z0-9\s,\-_/]+$/.test(reg)) {
+        errs.supportedRegions = "Enter valid region names separated by commas (e.g. EAST, PATNA).";
+      } else {
+        const parts = reg.split(",").map((s) => s.trim()).filter(Boolean);
+        if (parts.length === 0) {
+          errs.supportedRegions = "Please enter at least one valid region name.";
+        }
+      }
     }
 
     if (Object.keys(errs).length > 0) {
@@ -80,6 +106,12 @@ export default function AuditorCards() {
           setErrors({ email: msg });
         } else if (msg.toLowerCase().includes("name")) {
           setErrors({ fullName: msg });
+        } else if (msg.toLowerCase().includes("phone")) {
+          setErrors({ phone: msg });
+        } else if (msg.toLowerCase().includes("skill")) {
+          setErrors({ skills: msg });
+        } else if (msg.toLowerCase().includes("region")) {
+          setErrors({ supportedRegions: msg });
         }
       }
     } finally { setSaving(false); }
@@ -176,25 +208,62 @@ export default function AuditorCards() {
                   }}
                 />
               </Field>
-              <Field label="Phone"><input className={inputClass} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
+              <Field label="Phone *" error={errors.phone}>
+                <input
+                  className={`${inputClass} ${errors.phone ? "!border-red-500 focus:!border-red-500 focus:!ring-red-500/20" : ""}`}
+                  inputMode="tel"
+                  placeholder="10-digit mobile number"
+                  maxLength={10}
+                  value={form.phone}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, "").slice(0, 10);
+                    setForm({ ...form, phone: val });
+                    if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }));
+                  }}
+                />
+              </Field>
             </div>
-            <Field label="Emergency contact number (shown on the ID card)"><input className={inputClass} inputMode="tel" placeholder="Family member or colleague to call in an emergency" value={form.emergencyContact} maxLength={10} onChange={(e) => setForm({ ...form, emergencyContact: e.target.value.replace(/[^0-9]/g, "").slice(0, 10)} )} /></Field>
+            <Field label="Emergency contact number (shown on the ID card)"><input className={inputClass} inputMode="tel" placeholder="Family member or colleague to call in an emergency" value={form.emergencyContact} maxLength={10} onChange={(e) => setForm({ ...form, emergencyContact: e.target.value.replace(/[^0-9]/g, "").slice(0, 10) })} /></Field>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Date of birth (shown on the ID card)"><input type="date" className={inputClass} max={new Date().toISOString().slice(0, 10)} value={form.dateOfBirth} onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })} /></Field>
               <Field label="Base location"><input className={inputClass} value={form.baseLocation} onChange={(e) => setForm({ ...form, baseLocation: e.target.value })} /></Field>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Regions supported (comma separated)"><input className={inputClass} placeholder="EAST, PATNA" value={form.supportedRegions} onChange={(e) => setForm({ ...form, supportedRegions: e.target.value })} /></Field>
+              <Field label="Regions supported (comma separated)" error={errors.supportedRegions}>
+                <input
+                  className={`${inputClass} ${errors.supportedRegions ? "!border-red-500 focus:!border-red-500 focus:!ring-red-500/20" : ""}`}
+                  placeholder="EAST, PATNA"
+                  value={form.supportedRegions}
+                  onChange={(e) => {
+                    setForm({ ...form, supportedRegions: e.target.value });
+                    if (errors.supportedRegions) setErrors((prev) => ({ ...prev, supportedRegions: "" }));
+                  }}
+                />
+              </Field>
             </div>
             <div>
-              <span className="text-sm font-medium text-[#374151]">Skills</span>
-              <div className="mt-2 flex flex-wrap gap-2">
+              <span className="text-sm font-medium text-[#374151]">Skills *</span>
+              <div className={`mt-2 flex flex-wrap gap-2 rounded-xl p-1.5 transition ${errors.skills ? "border border-dashed border-red-400 bg-red-50/20" : ""}`}>
                 {Object.entries(SKILL_LABELS).map(([key, label]) => (
-                  <label key={key} className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm ${form.skills.includes(key) ? "border-[#63C174] bg-[#f5fcf6]" : "border-[#d8dee8]"}`}>
-                    <input type="checkbox" checked={form.skills.includes(key)} onChange={() => toggleSkill(key)} />{label}
+                  <label
+                    key={key}
+                    className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition ${
+                      form.skills.includes(key)
+                        ? "border-[#63C174] bg-[#f5fcf6] text-[#20242c] font-medium"
+                        : "border-[#d8dee8] text-gray-700 hover:border-gray-400"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={form.skills.includes(key)}
+                      onChange={() => toggleSkill(key)}
+                      className="rounded text-[#63C174] focus:ring-[#63C174]"
+                    />
+                    {label}
                   </label>
                 ))}
               </div>
+              {errors.skills && <span className="mt-1 block text-xs text-red-500">{errors.skills}</span>}
             </div>
             <Field label="Notes"><textarea rows="2" className={inputClass} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>
             <p className="text-xs text-gray-500">A temporary username and password are generated and emailed to the auditor, who then completes the training.</p>
