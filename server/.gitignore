@@ -1,7 +1,13 @@
+# Dependencies
 node_modules/
+
+# Generated output
 scripts/output/
 
-
+# Environment configuration and secrets
+env.ts
 .env
 .env.*
+
+# Allow safe environment template
 !.env.example

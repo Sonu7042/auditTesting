@@ -20,10 +20,14 @@ import { Platform } from 'react-native';
 // });
 
 
-// rohit verma ip adress 
+// Android Emulator: 'http://10.0.2.2:5000/api'
+// Physical Device (Wi-Fi): 'http://192.168.1.21:5000/api'
+// Device with USB (adb reverse): 'http://localhost:5000/api'
+
+// Android Emulator uses 10.0.2.2 to reach host localhost:5000
 const developmentUrl =
   Platform.OS === 'android'
-    ? 'http://192.168.1.20:5000/api'
+    ? 'http://10.0.2.2:5000/api'
     : 'http://localhost:5000/api';
 
 export const env = Object.freeze({
